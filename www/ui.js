@@ -2,6 +2,7 @@
 import { gameState, session } from './state.js?v=74';
 import { escapeHTML } from './utils.js?v=73';
 import { t } from './i18n.js?v=8';
+import { syncFirebaseLeaderboardEntry } from './firebase-service.js?v=1';
 
 const SOLO_LEADERBOARD_KEY = 'memorabetSoloLeaderboard';
 const DEFAULT_AVATAR = 'assets/avatars/avatar-01.png';
@@ -212,14 +213,44 @@ export function getSoloLeaderboard(){
   }
 }
 
-export function addSoloLeaderboardEntry(entry){
-  const ranking = [...getSoloLeaderboard(), entry]
+function normalizeSoloLeaderboard(ranking){
+  return (Array.isArray(ranking) ? ranking : [])
     .filter(item => Number.isFinite(Number(item?.tiempoMs)) && Number.isFinite(Number(item?.intentos)))
+    .map(item => {
+      const completedAt = Number(item.completedAt) || Date.now();
+      return {
+        ...item,
+        id:String(item.id || `${completedAt}-${Number(item.intentos)}-${Number(item.tiempoMs)}`).replace(/[.#$/[\]]/g, '-'),
+        name:String(item.name || session.currentUser?.nickname || t('common.player')).slice(0, 48),
+        tiempoMs:Number(item.tiempoMs),
+        intentos:Number(item.intentos),
+        completedAt,
+        source:'solo'
+      };
+    })
     .sort((a, b) => Number(a.intentos) - Number(b.intentos) || Number(a.tiempoMs) - Number(b.tiempoMs))
     .slice(0, 20);
+}
 
-  localStorage.setItem(SOLO_LEADERBOARD_KEY, JSON.stringify(ranking));
-  session.cachedLeaderboard = ranking;
+export function replaceSoloLeaderboard(ranking, shouldRender = true){
+  const normalized = normalizeSoloLeaderboard(ranking);
+  localStorage.setItem(SOLO_LEADERBOARD_KEY, JSON.stringify(normalized));
+  session.cachedLeaderboard = normalized;
+  if(shouldRender) renderLeaderboard(normalized);
+  return normalized;
+}
+
+export function addSoloLeaderboardEntry(entry){
+  const completedAt = Number(entry?.completedAt) || Date.now();
+  const savedEntry = {
+    ...entry,
+    id:String(entry?.id || `${completedAt}-${Number(entry?.intentos || 0)}-${Number(entry?.tiempoMs || 0)}`).replace(/[.#$/[\]]/g, '-'),
+    completedAt,
+    source:'solo'
+  };
+  const ranking = replaceSoloLeaderboard([...getSoloLeaderboard(), savedEntry], false);
+
+  syncFirebaseLeaderboardEntry(savedEntry).catch(() => {});
   return ranking;
 }
 

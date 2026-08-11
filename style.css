@@ -2710,3 +2710,95 @@ body:not(.game-round-active) .bottom-hud{
   }
 }
 
+.firebase-account-section{
+  display:grid;
+  gap:12px;
+}
+.firebase-auth-status{
+  min-height:20px;
+  padding:10px 12px;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:10px;
+  background:rgba(255,255,255,.07);
+  color:#f4f7ef;
+  font-size:13px;
+  font-weight:800;
+  line-height:1.35;
+}
+.firebase-auth-status.success{
+  border-color:rgba(82,207,122,.55);
+  background:rgba(27,112,58,.24);
+  color:#c9f6d6;
+}
+.firebase-auth-status.warning{
+  border-color:rgba(255,205,86,.55);
+  background:rgba(127,92,16,.24);
+  color:#ffe3a2;
+}
+.firebase-auth-status.danger{
+  border-color:rgba(255,118,118,.55);
+  background:rgba(122,35,35,.25);
+  color:#ffc6c6;
+}
+.firebase-auth-panel,
+.firebase-user-panel{
+  display:grid;
+  gap:10px;
+}
+.firebase-user-panel[hidden],
+.firebase-auth-panel[hidden]{
+  display:none;
+}
+.firebase-auth-field{
+  display:grid;
+  gap:6px;
+  color:white;
+  font-size:13px;
+  font-weight:900;
+}
+.firebase-auth-field span{
+  color:var(--gold);
+  text-transform:uppercase;
+  font-size:12px;
+}
+.firebase-auth-field input{
+  width:100%;
+  min-height:42px;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:10px;
+  background:rgba(8,11,18,.62);
+  color:white;
+  padding:0 12px;
+  font:inherit;
+  font-weight:800;
+  outline:none;
+}
+.firebase-auth-field input:focus{
+  border-color:rgba(249,199,79,.76);
+  box-shadow:0 0 0 3px rgba(249,199,79,.16);
+}
+.firebase-auth-field input::placeholder{
+  color:rgba(235,238,230,.48);
+}
+.firebase-auth-actions{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+}
+.firebase-user-panel p{
+  margin:0;
+  color:var(--muted);
+  font-size:14px;
+}
+.firebase-user-panel strong{
+  color:white;
+}
+@media(max-width:560px){
+  .firebase-auth-actions{
+    grid-template-columns:1fr;
+  }
+  .firebase-auth-status{
+    font-size:12px;
+  }
+}
+

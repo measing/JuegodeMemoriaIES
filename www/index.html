@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png?v=3" />
   <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=3" />
   <link rel="apple-touch-icon" href="assets/app-icon-192.png?v=3" />
-  <link rel="stylesheet" href="style.css?v=132" />
+  <link rel="stylesheet" href="style.css?v=133" />
 </head>
 <body>
   <div id="mobile-loading-screen" class="mobile-loading-screen" aria-hidden="true">
@@ -145,6 +145,35 @@
             <h1 id="settings-title">Configuracion</h1>
           </div>
 
+          <section class="settings-section firebase-account-section">
+            <h3>Cuenta y ranking en linea</h3>
+            <p>Inicia sesion para sincronizar tu ranking solitario en Firebase. Si Firebase no esta disponible, el juego seguira usando el ranking local.</p>
+            <div id="firebase-auth-status" class="firebase-auth-status info" aria-live="polite">Firebase se conectara al cargar.</div>
+            <div id="firebase-user-panel" class="firebase-user-panel" hidden>
+              <p>Sesion activa: <strong id="firebase-user-label">Usuario conectado</strong></p>
+              <button class="settings-action danger-action" type="button" data-firebase-auth-action="logout">Cerrar sesion</button>
+            </div>
+            <div id="firebase-auth-panel" class="firebase-auth-panel">
+              <label class="firebase-auth-field">
+                <span>Nombre</span>
+                <input id="firebase-display-name" type="text" autocomplete="nickname" placeholder="Jugador solitario" />
+              </label>
+              <label class="firebase-auth-field">
+                <span>Correo</span>
+                <input id="firebase-email" type="email" autocomplete="email" placeholder="correo@ejemplo.com" />
+              </label>
+              <label class="firebase-auth-field">
+                <span>Contrasena</span>
+                <input id="firebase-password" type="password" autocomplete="current-password" placeholder="Minimo 6 caracteres" />
+              </label>
+              <div class="firebase-auth-actions">
+                <button class="settings-action" type="button" data-firebase-auth-action="create">Crear cuenta</button>
+                <button class="settings-action" type="button" data-firebase-auth-action="login">Iniciar sesion</button>
+                <button class="settings-action google-action" type="button" data-firebase-auth-action="google">Google</button>
+              </div>
+            </div>
+          </section>
+
           <section class="settings-section">
             <h3 id="settings-audio-heading">Audio</h3>
             <label class="volume-row">
@@ -196,7 +225,7 @@
       }, 800);
     })();
   </script>
-  <script type="module" src="main.js?v=141"></script>
+  <script type="module" src="main.js?v=142"></script>
 </body>
 </html>
 
