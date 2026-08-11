@@ -25,6 +25,9 @@ const CARD_SKINS = [
   { id:'banana', name:'Banana real', src:'assets/card-backs/skin-banana.png?v=1' }
 ];
 
+let currentViewName = 'game';
+let previousContentViewName = 'game';
+
 function applySelectedAvatar(){
   document.querySelectorAll('[data-avatar-display]').forEach(el => {
     el.style.backgroundImage = `url("${DEFAULT_AVATAR}")`;
@@ -331,8 +334,19 @@ export function showVictoryAnimation({ tiempoMs, intentos }){
   setTimeout(() => overlay.classList.add('show'), 20);
 }
 
+function getActiveViewName(){
+  return document.querySelector('.screen-view.active')?.dataset.view || currentViewName || 'game';
+}
+
 export function showView(viewName){
   const target = viewName || 'game';
+  const previous = getActiveViewName();
+  if(target === 'settings' && previous && previous !== 'settings'){
+    previousContentViewName = previous;
+  }else if(target !== 'settings'){
+    previousContentViewName = target;
+  }
+
   document.querySelectorAll('.screen-view').forEach(view => {
     view.classList.toggle('active', view.dataset.view === target);
   });
@@ -347,11 +361,24 @@ export function showView(viewName){
   if(target === 'ranking') renderLeaderboard();
   if(target === 'store') renderCardSkinStore();
   if(target === 'profile') renderMobileProfile();
+  currentViewName = target;
+}
+
+export function toggleSettingsView(){
+  const active = getActiveViewName();
+  if(active === 'settings'){
+    showView(previousContentViewName || 'game');
+    return;
+  }
+  showView('settings');
 }
 
 export function initViewNavigation(){
   document.querySelectorAll('[data-view-target]').forEach(button => {
     button.addEventListener('click', () => showView(button.dataset.viewTarget));
+  });
+  document.querySelectorAll('[data-settings-toggle]').forEach(button => {
+    button.addEventListener('click', toggleSettingsView);
   });
 }
 

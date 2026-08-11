@@ -1,6 +1,6 @@
 import { startSelectedGame, resetGame, exitGame } from './game.js?v=106';
 import { session } from './state.js?v=74';
-import { updateStats, renderLeaderboard, renderMobileProfile, getSoloLeaderboard, replaceSoloLeaderboard, initRulesModal, initViewNavigation, showView, initCardSkinStore } from './ui.js?v=113';
+import { updateStats, renderLeaderboard, renderMobileProfile, getSoloLeaderboard, replaceSoloLeaderboard, initRulesModal, initViewNavigation, toggleSettingsView, initCardSkinStore } from './ui.js?v=114';
 import { initAudioControls } from './audio.js?v=75';
 import { initI18n, translatePage } from './i18n.js?v=9';
 import { initFirebaseIntegration } from './firebase-service.js?v=6';
@@ -88,7 +88,7 @@ function registerServiceWorker(){
 }
 
 function bindEvents(){
-  document.getElementById('btn-change-user')?.addEventListener('click', () => showView('settings'));
+  document.getElementById('btn-change-user')?.addEventListener('click', toggleSettingsView);
   document.getElementById('btn-start-center')?.addEventListener('click', startSelectedGame);
   document.getElementById('btn-new')?.addEventListener('click', startSelectedGame);
   document.getElementById('btn-reset')?.addEventListener('click', resetGame);
