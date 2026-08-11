@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#050505" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Solitario UCM" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Solitario UCM</title>
+  <link rel="manifest" href="manifest.webmanifest?v=4" />
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png?v=3" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png?v=3" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=3" />
+  <link rel="apple-touch-icon" href="assets/app-icon-192.png?v=3" />
+  <link rel="stylesheet" href="style.css?v=132" />
+</head>
+<body>
+  <div id="mobile-loading-screen" class="mobile-loading-screen" aria-hidden="true">
+    <div class="mobile-loading-art" aria-hidden="true"></div>
+    <div class="mobile-loading-vignette" aria-hidden="true"></div>
+    <div class="mobile-loading-content">
+      <img src="assets/card-backs/ucm-statistics-default.png" alt="Solitario UCM" class="mobile-loading-logo" />
+      <div class="mobile-loading-copy">
+        <strong id="mobile-loading-percent">0%</strong>
+        <span id="mobile-loading-text">Barajando cartas...</span>
+      </div>
+      <div class="mobile-loading-bar" aria-hidden="true">
+        <span id="mobile-loading-fill"></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="rules-modal" class="rules-modal" aria-hidden="true">
+    <div class="rules-box">
+      <button class="rules-close" id="rules-accept" type="button" aria-label="Cerrar reglas">&times;</button>
+      <div class="rules-title-wrap">
+        <span>&#9733;</span>
+        <h2>Reglas del juego</h2>
+        <span>&#9733;</span>
+      </div>
+      <div class="rules-list-modal">
+        <div class="rule-row"><span>&#127183;</span><p>Encuentra todas las parejas de cartas iguales.</p></div>
+        <div class="rule-row"><span>&#9201;</span><p>Memoriza las cartas, sigue el mezclado y juega antes de quedarte sin intentos.</p></div>
+        <div class="rule-row"><span>&#127942;</span><p>Si completas los 8 pares, tu tiempo entra al ranking solitario de este dispositivo.</p></div>
+        <div class="rule-row"><span>&#9888;</span><p>Si reinicias o sales antes de terminar, esa partida no se registra.</p></div>
+      </div>
+      <label class="dont-show-row">
+        <input type="checkbox" checked />
+        <span>No volver a mostrar estas reglas</span>
+      </label>
+      <button class="btn btn-green rules-accept" type="button" onclick="document.getElementById('rules-accept').click()">Entendido</button>
+    </div>
+  </div>
+
+  <main class="casino-shell">
+    <aside class="casino-sidebar">
+      <section class="solo-sidebar-profile" aria-label="Perfil de jugador solitario">
+        <div class="solo-profile-avatar" data-avatar-display></div>
+        <div class="solo-profile-copy">
+          <strong>Jugador solitario</strong>
+          <span>Modo practica local</span>
+        </div>
+        <div class="solo-profile-stats" aria-label="Estadisticas solitarias">
+          <span><b>8</b><small>pares</small></span>
+          <span><b>10</b><small>intentos</small></span>
+        </div>
+      </section>
+      <nav class="casino-menu" aria-label="Menu principal">
+        <button class="menu-item active" type="button" data-view-target="game" aria-current="page"><span class="menu-emoji" aria-hidden="true">&#127918;</span><span class="menu-label">Juego</span></button>
+        <button class="menu-item" type="button" data-view-target="store"><span class="menu-emoji" aria-hidden="true">&#128722;</span><span class="menu-label">Tienda</span></button>
+        <button class="menu-item" type="button" data-view-target="ranking"><span class="menu-emoji" aria-hidden="true">&#127942;</span><span class="menu-label">Ranking</span></button>
+        <button class="menu-item" type="button" data-view-target="settings"><span class="menu-emoji" aria-hidden="true">&#9881;</span><span class="menu-label">Configuracion</span></button>
+      </nav>
+    </aside>
+
+    <section class="game-stage">
+      <section class="screen-view game-view active" id="game-view" data-view="game">
+        <div class="game-toolbar">
+          <section class="player-strip">
+            <div class="player-avatar avatar-display" data-avatar-display></div>
+            <div>
+              <h2 id="player-name">Modo solitario</h2>
+              <p class="player-awards">Ranking local de juego solitario</p>
+            </div>
+          </section>
+
+          <div class="game-toolbar-actions">
+            <button class="toolbar-icon-button" id="btn-change-user" type="button" aria-label="Configuracion">&#9881;</button>
+          </div>
+        </div>
+
+        <header class="top-hud">
+          <div class="hud-cell"><span>Ronda:</span><strong id="round-number">1</strong></div>
+          <div class="hud-cell"><span>Parejas:</span><strong id="pares">0 / 8</strong></div>
+        </header>
+
+        <div id="msg" class="message info visible">Presiona Comenzar juego para comenzar.</div>
+
+        <section class="board-wrapper">
+          <div class="start-game-panel" id="start-game-panel">
+            <div class="start-actions">
+              <button class="start-game-button" id="btn-start-center" type="button">Comenzar juego</button>
+              <p class="selected-mode-label" id="selected-mode-label">Modo solitario</p>
+            </div>
+          </div>
+          <div class="board" id="board"></div>
+        </section>
+
+        <footer class="bottom-hud">
+          <div class="bottom-stat"><span>Intentos</span><strong id="intentos">10</strong></div>
+          <div class="bottom-stat"><span>Tiempo</span><strong id="tiempo">00:00</strong></div>
+          <button class="btn btn-green" id="btn-new" type="button">Nueva partida</button>
+          <button class="btn btn-orange" id="btn-reset" type="button">Reiniciar</button>
+          <button class="btn btn-red" id="btn-exit" type="button">Salir</button>
+        </footer>
+      </section>
+
+
+      <section class="screen-view page-view" id="store-view" data-view="store">
+        <div class="view-panel">
+          <div class="view-heading">
+            <span aria-hidden="true">&#128722;</span>
+            <h1>Tienda</h1>
+          </div>
+          <div id="store-status" class="store-status" aria-live="polite"></div>
+          <div id="card-skin-store" class="store-grid"></div>
+        </div>
+      </section>
+      <section class="screen-view page-view" id="ranking-view" data-view="ranking">
+        <div class="view-panel">
+          <div class="view-heading">
+            <span>&#127942;</span>
+            <h1>Ranking solitario</h1>
+          </div>
+          <div id="leaderboard-list" class="ranking-list page-list"><p class="empty">Aun nadie completa los 8 pares.</p></div>
+        </div>
+      </section>
+
+      <section class="screen-view page-view" id="settings-view" data-view="settings">
+        <div class="view-panel settings-page">
+          <div class="view-heading">
+            <span aria-hidden="true">&#9881;</span>
+            <h1 id="settings-title">Configuracion</h1>
+          </div>
+
+          <section class="settings-section">
+            <h3 id="settings-audio-heading">Audio</h3>
+            <label class="volume-row">
+              <span><span id="volume-master-text">General</span> <strong id="volume-master-value">50%</strong></span>
+              <input id="volume-master" type="range" min="0" max="100" step="1" />
+            </label>
+            <label class="volume-row">
+              <span><span id="volume-music-text">Musica</span> <strong id="volume-music-value">50%</strong></span>
+              <input id="volume-music" type="range" min="0" max="100" step="1" />
+            </label>
+            <label class="volume-row">
+              <span><span id="volume-effects-text">Efectos</span> <strong id="volume-effects-value">50%</strong></span>
+              <input id="volume-effects" type="range" min="0" max="100" step="1" />
+            </label>
+          </section>
+
+          <section class="settings-section">
+            <h3 id="settings-language-heading">Idioma</h3>
+            <label class="language-row">
+              <span id="settings-language-label">Idioma del juego</span>
+              <select id="language-select" aria-label="Idioma del juego"></select>
+            </label>
+          </section>
+
+          <section class="settings-section">
+            <h3 id="settings-legal-heading">Legal</h3>
+            <p id="settings-legal-text">Solitario UCM es un juego de memoria sin apuestas, pagos ni premios reales.</p>
+            <div class="settings-actions">
+              <a id="settings-privacy-link" class="settings-action legal-link" href="privacidad.html" target="_blank" rel="noopener">Politica de privacidad</a>
+            </div>
+          </section>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    (function(){
+      if(window.location.protocol !== 'file:') return;
+      function showLocalFileHelp(){
+        var msg = document.getElementById('msg');
+        if(msg){
+          msg.className = 'message visible warning';
+          msg.textContent = 'Abre el juego con el archivo .bat incluido para que los modulos carguen correctamente.';
+        }
+      }
+      setTimeout(function(){
+        if(!window.__memorabetMainLoaded) showLocalFileHelp();
+      }, 800);
+    })();
+  </script>
+  <script type="module" src="main.js?v=141"></script>
+</body>
+</html>
+

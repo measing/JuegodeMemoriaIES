@@ -1,0 +1,23 @@
+{
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.sortOrder": "foldersNestsFiles",
+  "explorer.fileNesting.patterns": {
+    "index.html": "main.js, style.css, service-worker.js, manifest.webmanifest, privacidad.html, eliminar-cuenta.html, google*.html, CNAME, .nojekyll",
+    "main.js": "auth.js, game.js, ui.js, database.js, friends.js, audio.js, i18n.js, state.js, constants.js, utils.js, firebase-config.js, app-check-config.js, cloud-functions.js",
+    "firebase.json": ".firebaserc, firebase-rules.json",
+    "package.json": "package-lock.json, capacitor.config.json",
+    "README.md": "PLAYSTORE-CHECKLIST.md, SEGURIDAD-OWASP.md",
+    "abrir-memorabet.bat": "servidor-local.js, desplegar-firebase-seguro.bat, generar-aab-release.bat, crear-keystore-release.bat, restaurar-rankings.bat"
+  },
+  "files.exclude": {
+    "**/.agents": true,
+    "**/.codex": true,
+    "**/.firebase": true,
+    "**/.gradle": true,
+    "**/.idea": true,
+    "**/build": true,
+    "**/node_modules": true,
+    "**/functions/node_modules": true
+  }
+}
