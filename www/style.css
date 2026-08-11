@@ -87,6 +87,9 @@ img{
   display:none;
 }
 @media(max-width:720px), (hover:none) and (pointer:coarse){
+  html{
+    scrollbar-gutter:auto;
+  }
   body.mobile-loading-active{
     overflow:hidden;
   }
@@ -97,7 +100,7 @@ img{
     display:grid;
     place-items:end center;
     min-height:var(--app-height);
-    background:#060606;
+    background:#0d1418;
     opacity:1;
     visibility:visible;
     pointer-events:auto;
@@ -112,9 +115,9 @@ img{
   .mobile-loading-art{
     position:absolute;
     inset:0;
-    background-image:url("assets/mobile-loading.png");
+    background-image:url("assets/mobile-start-background.png?v=1");
     background-size:cover;
-    background-position:center top;
+    background-position:center center;
     transform:scale(1.02);
     animation:mobile-loading-zoom 2.8s ease-out both;
   }
@@ -122,8 +125,8 @@ img{
     position:absolute;
     inset:0;
     background:
-      linear-gradient(180deg, rgba(0,0,0,.08) 0%, rgba(0,0,0,.08) 45%, rgba(0,0,0,.84) 100%),
-      radial-gradient(circle at 50% 34%, rgba(255,211,92,.08), rgba(0,0,0,.42) 75%);
+      linear-gradient(180deg, rgba(0,0,0,.08) 0%, rgba(0,0,0,.02) 34%, rgba(0,0,0,.18) 62%, rgba(0,0,0,.78) 100%),
+      radial-gradient(circle at 50% 58%, rgba(255,211,92,.08), transparent 46%);
   }
   .mobile-loading-content{
     position:relative;
@@ -136,10 +139,15 @@ img{
   }
   .mobile-loading-logo{
     position:fixed;
-    top:calc(16px + env(safe-area-inset-top));
+    top:calc(14px + env(safe-area-inset-top));
     right:14px;
-    width:clamp(92px, 28vw, 132px);
-    filter:drop-shadow(0 0 18px rgba(0,0,0,.85)) drop-shadow(0 0 18px rgba(249,199,79,.28));
+    width:clamp(72px, 22vw, 106px);
+    padding:7px;
+    border-radius:18px;
+    background:rgba(255,255,255,.78);
+    border:1px solid rgba(255,255,255,.56);
+    box-shadow:0 10px 26px rgba(0,0,0,.24);
+    filter:drop-shadow(0 0 14px rgba(0,0,0,.35));
   }
   .mobile-loading-copy{
     width:100%;
@@ -148,7 +156,12 @@ img{
     justify-content:space-between;
     gap:12px;
     color:white;
-    text-shadow:0 2px 8px rgba(0,0,0,.9);
+    padding:10px 12px;
+    border-radius:14px;
+    background:rgba(3,10,14,.58);
+    border:1px solid rgba(255,255,255,.14);
+    backdrop-filter:blur(8px);
+    text-shadow:0 2px 8px rgba(0,0,0,.88);
     font-weight:900;
   }
   .mobile-loading-copy strong{
@@ -167,7 +180,7 @@ img{
     padding:4px;
     border:2px solid rgba(43,22,5,.95);
     border-radius:999px;
-    background:linear-gradient(180deg,#170907,#060203);
+    background:linear-gradient(180deg,rgba(23,9,7,.94),rgba(6,2,3,.94));
     box-shadow:
       0 0 0 2px rgba(249,199,79,.45),
       0 0 24px rgba(0,0,0,.72),

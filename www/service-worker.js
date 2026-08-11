@@ -1,4 +1,4 @@
-const CACHE_NAME = 'memorabet-solo-v17';
+const CACHE_NAME = 'memorabet-solo-v19';
 
 const LOCAL_ASSETS = [
   './',
@@ -17,6 +17,8 @@ const LOCAL_ASSETS = [
   './manifest.webmanifest',
   './assets/logo.png',
   './assets/mobile-loading.png',
+  './assets/mobile-start-background.png',
+  './assets/ies-logo.png',
   './assets/casino-background.png',
   './assets/ucm-classroom-background.png',
   './assets/favicon-16.png',
