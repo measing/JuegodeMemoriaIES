@@ -14,9 +14,9 @@ import {
   addSoloLeaderboardEntry,
   renderLeaderboard,
   showRulesModalIfNeeded
-} from './ui.js?v=114';
+} from './ui.js?v=115';
 import { playCardFlip, playShuffle, playMatch, playMiss } from './audio.js?v=75';
-import { t } from './i18n.js?v=8';
+import { t } from './i18n.js?v=10';
 
 const VISIBLE_SHUFFLE_SWAPS = [
   [0, 5], [3, 10], [12, 7], [15, 2],
@@ -245,15 +245,17 @@ export function endGame(){
 
   const completed = gameState.matched === TOTAL_PAIRS;
   const tiempoMs = gameState.startTime ? gameState.endTime - gameState.startTime : 0;
+  const savedRanking = addSoloLeaderboardEntry({
+    name:session.currentUser?.nickname || t('common.player'),
+    tiempoMs,
+    intentos:gameState.intentos,
+    pairs:gameState.matched,
+    completed,
+    completedAt:Date.now()
+  });
+  renderLeaderboard(savedRanking);
 
   if(completed){
-    addSoloLeaderboardEntry({
-      name:session.currentUser?.nickname || t('common.player'),
-      tiempoMs,
-      intentos:gameState.intentos,
-      completedAt:Date.now()
-    });
-    renderLeaderboard();
     showMsg(t('msg.completed', {
       time:formatDuration(tiempoMs),
       tries:gameState.intentos

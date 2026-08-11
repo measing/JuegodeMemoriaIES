@@ -38,7 +38,9 @@ const firebaseState = {
 };
 
 function byBestScore(a, b){
-  return Number(a.intentos) - Number(b.intentos) || Number(a.tiempoMs) - Number(b.tiempoMs);
+  return Number(b.pairs || 0) - Number(a.pairs || 0)
+    || Number(a.intentos) - Number(b.intentos)
+    || Number(a.tiempoMs) - Number(b.tiempoMs);
 }
 
 function byGlobalScore(a, b){
@@ -61,11 +63,14 @@ function normalizeEntry(entry){
   if(!Number.isFinite(tiempoMs) || !Number.isFinite(intentos)) return null;
 
   const completedAt = Number(entry?.completedAt) || Date.now();
+  const pairs = Math.max(0, Math.min(8, Math.round(Number(entry?.pairs ?? entry?.pares ?? entry?.matchedPairs ?? 8))));
   return {
     id:String(entry?.id || `${completedAt}-${intentos}-${tiempoMs}`).replace(/[.#$/[\]]/g, '-'),
     name:String(entry?.name || firebaseState.currentUser?.displayName || firebaseState.currentUser?.email || 'Jugador').slice(0, 48),
     tiempoMs,
     intentos,
+    pairs,
+    completed:Boolean(entry?.completed ?? pairs === 8),
     completedAt,
     source:'solo'
   };
@@ -172,10 +177,10 @@ function renderLocalLiveFallback(){
   const local = firebaseState.callbacks.getLocalLeaderboard()
     .map(item => ({
       alias:safeAlias(item?.name || session.currentUser?.nickname || 'Jugador'),
-      pairs:8,
+      pairs:Math.max(0, Math.min(8, Math.round(Number(item?.pairs ?? item?.pares ?? item?.matchedPairs ?? 8)))),
       tiempoMs:Number(item?.tiempoMs || 0),
       intentos:Number(item?.intentos || 0),
-      score:8000 - Number(item?.intentos || 0) * 10,
+      score:Math.max(0, Math.max(0, Math.min(8, Math.round(Number(item?.pairs ?? item?.pares ?? item?.matchedPairs ?? 8)))) * 1000 - Number(item?.intentos || 0) * 100 - Math.floor(Number(item?.tiempoMs || 0) / 1000)),
       updatedAt:Number(item?.completedAt || 0)
     }));
   renderLiveLeaderboard(local, true);
@@ -357,10 +362,10 @@ async function writeGlobalBestEntry(bestEntry){
   const alias = safeAlias(firebaseState.currentUser.displayName || firebaseState.currentUser.email || normalized.name);
   const publicEntry = {
     alias,
-    pairs:8,
+    pairs:Number(normalized.pairs || 0),
     tiempoMs:Number(normalized.tiempoMs),
     intentos:Number(normalized.intentos),
-    score:Math.max(0, 8000 - Number(normalized.intentos) * 100 - Math.floor(Number(normalized.tiempoMs) / 1000)),
+    score:Math.max(0, Number(normalized.pairs || 0) * 1000 - Number(normalized.intentos) * 100 - Math.floor(Number(normalized.tiempoMs) / 1000)),
     updatedAt:Number(normalized.completedAt || Date.now())
   };
   const { ref, set } = firebaseState.dbApi;
@@ -576,7 +581,11 @@ export async function initFirebaseIntegration(callbacks = {}){
 
 export function syncFirebaseLeaderboardEntry(entry){
   const normalized = normalizeEntry(entry);
-  if(!normalized || !firebaseState.ready || !firebaseState.currentUser) return Promise.resolve(false);
+  if(!normalized) return Promise.resolve(false);
+  if(!firebaseState.ready || !firebaseState.currentUser){
+    renderLocalLiveFallback();
+    return Promise.resolve(false);
+  }
 
   const merged = mergeRankings(firebaseState.cloudLeaderboard, firebaseState.callbacks.getLocalLeaderboard(), [normalized]);
   firebaseState.cloudLeaderboard = merged;

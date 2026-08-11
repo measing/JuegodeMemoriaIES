@@ -1,8 +1,8 @@
 import { K_MAX, TOTAL_PAIRS } from './constants.js?v=73';
 import { gameState, session } from './state.js?v=74';
 import { escapeHTML } from './utils.js?v=73';
-import { t } from './i18n.js?v=8';
-import { syncFirebaseLeaderboardEntry } from './firebase-service.js?v=6';
+import { t } from './i18n.js?v=10';
+import { syncFirebaseLeaderboardEntry } from './firebase-service.js?v=8';
 
 const SOLO_LEADERBOARD_KEY = 'memorabetSoloLeaderboard';
 const DEFAULT_AVATAR = 'assets/avatars/avatar-01.png';
@@ -221,17 +221,20 @@ function normalizeSoloLeaderboard(ranking){
     .filter(item => Number.isFinite(Number(item?.tiempoMs)) && Number.isFinite(Number(item?.intentos)))
     .map(item => {
       const completedAt = Number(item.completedAt) || Date.now();
+      const pairs = Math.max(0, Math.min(TOTAL_PAIRS, Math.round(Number(item?.pairs ?? item?.pares ?? item?.matchedPairs ?? TOTAL_PAIRS))));
       return {
         ...item,
         id:String(item.id || `${completedAt}-${Number(item.intentos)}-${Number(item.tiempoMs)}`).replace(/[.#$/[\]]/g, '-'),
         name:String(item.name || session.currentUser?.nickname || t('common.player')).slice(0, 48),
         tiempoMs:Number(item.tiempoMs),
         intentos:Number(item.intentos),
+        pairs,
+        completed:Boolean(item.completed ?? pairs === TOTAL_PAIRS),
         completedAt,
         source:'solo'
       };
     })
-    .sort((a, b) => Number(a.intentos) - Number(b.intentos) || Number(a.tiempoMs) - Number(b.tiempoMs))
+    .sort((a, b) => Number(b.pairs || 0) - Number(a.pairs || 0) || Number(a.intentos) - Number(b.intentos) || Number(a.tiempoMs) - Number(b.tiempoMs))
     .slice(0, 20);
 }
 
@@ -264,21 +267,23 @@ export function renderLeaderboard(ranking = getSoloLeaderboard()){
 
   session.cachedLeaderboard = ranking;
   if(!ranking.length){
-    list.innerHTML = `<p class="empty">${escapeHTML(t('ranking.emptySolo'))}</p>`;
+    list.innerHTML = `<p class="empty">Aun no hay partidas registradas.</p>`;
     return;
   }
+
+  const normalized = normalizeSoloLeaderboard(ranking);
 
   list.innerHTML = `
     <section class="ranking-section ranking-section-solo">
       <h2>${escapeHTML(t('ranking.soloTitle'))}</h2>
-      ${ranking.map((item, index) => `
+      ${normalized.map((item, index) => `
         <div class="ranking-item">
           <div class="entry-avatar ranking-avatar"><span>${index + 1}</span></div>
           <div>
             <div class="ranking-name">#${index + 1} ${escapeHTML(item.name || t('common.player'))}</div>
-            <div class="ranking-meta">${formatDuration(Number(item.tiempoMs || 0))} &middot; ${escapeHTML(t('ranking.tries', { count:Number(item.intentos || 0) }))}</div>
+            <div class="ranking-meta">${Number(item.pairs || 0)}/${TOTAL_PAIRS} pares &middot; ${escapeHTML(t('ranking.tries', { count:Number(item.intentos || 0) }))} &middot; ${formatDuration(Number(item.tiempoMs || 0))}</div>
           </div>
-          <div class="ranking-prize">${formatDuration(Number(item.tiempoMs || 0))}</div>
+          <div class="ranking-prize">${Number(item.pairs || 0)}/${TOTAL_PAIRS}</div>
         </div>
       `).join('')}
     </section>

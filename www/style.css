@@ -3206,6 +3206,38 @@ body.guest-mode .solo-account-actions button{
   }
 }
 @media (max-width:860px){
+  .game-toolbar{
+    justify-content:flex-start;
+    padding-right:70px;
+    box-sizing:border-box;
+  }
+  .game-toolbar .player-strip{
+    flex:0 1 auto;
+    width:max-content;
+    max-width:calc(100vw - 104px);
+    padding:8px 12px 8px 10px;
+    overflow:hidden;
+    background:linear-gradient(90deg, rgba(0,0,0,.48), rgba(0,0,0,.36) 78%, rgba(0,0,0,0));
+    box-shadow:0 8px 18px rgba(0,0,0,.16);
+    backdrop-filter:blur(4px);
+  }
+  .game-toolbar .player-strip > div:not(.player-avatar){
+    min-width:0;
+    max-width:calc(100vw - 178px);
+  }
+  .game-toolbar .player-strip h2{
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .game-toolbar-actions{
+    position:relative;
+    z-index:2;
+  }
+  .casino-menu .menu-item[data-view-target="settings"]{
+    display:none!important;
+  }
   .toolbar-icon-button#btn-change-user{
     width:50px;
     height:50px;

@@ -31,8 +31,8 @@ const DICTIONARY = {
     'rules.close':'Cerrar reglas',
     'rules.one':'Encuentra todas las parejas de cartas iguales.',
     'rules.two':'Memoriza las cartas, sigue el mezclado y juega antes de quedarte sin intentos.',
-    'rules.three':'Si completas los 8 pares, tu tiempo entra al ranking solitario de este dispositivo.',
-    'rules.four':'Si reinicias o sales antes de terminar, esa partida no se registra.',
+    'rules.three':'Al terminar, tu resultado entra al ranking solitario con pares, intentos y tiempo.',
+    'rules.four':'Si reinicias o sales antes de agotar los intentos o completar los 8 pares, esa partida no se registra.',
     'rules.dontShow':'No volver a mostrar estas reglas',
     'rules.accept':'Entendido',
     'hud.round':'Ronda:',
@@ -43,7 +43,7 @@ const DICTIONARY = {
     'button.newGame':'Nueva partida',
     'button.reset':'Reiniciar',
     'button.exit':'Salir',
-    'ranking.emptySolo':'Aun nadie completa los 8 pares.',
+    'ranking.emptySolo':'Aun no hay partidas registradas.',
     'ranking.soloTitle':'Ranking solitario',
     'ranking.tries':'{count} intentos',
     'msg.start':'Presiona Comenzar juego para comenzar.',
@@ -65,7 +65,7 @@ const DICTIONARY = {
     'victory.tries':'Intentos'
   },
   en:{
-    'common.player':'Player','common.loading':'Preparing game...','common.close':'Close','nav.play':'Game','nav.ranking':'Ranking','nav.settings':'Settings','settings.title':'Settings','settings.audio':'Audio','settings.language':'Language','settings.languageLabel':'Game language','settings.legal':'Legal','settings.legalText':'Solitario UCM is a memory game with no betting, payments, or real prizes.','settings.privacyPolicy':'Privacy policy','settings.master':'Master','settings.music':'Music','settings.effects':'Effects','rules.title':'Game rules','rules.close':'Close rules','rules.one':'Find every matching card pair.','rules.two':'Memorize the cards, follow the shuffle, and play before you run out of tries.','rules.three':'Complete all 8 pairs to enter this device solo ranking.','rules.four':'Restarting or leaving before finishing does not record the game.','rules.dontShow':'Do not show these rules again','rules.accept':'Got it','hud.round':'Round:','hud.pairs':'Pairs:','hud.tries':'Tries','hud.time':'Time','button.start':'Start game','button.newGame':'New game','button.reset':'Restart','button.exit':'Exit','ranking.emptySolo':'Nobody has completed all 8 pairs yet.','ranking.soloTitle':'Solo ranking','ranking.tries':'{count} tries','msg.start':'Press Start game to begin.','msg.preparing':'A game is already being prepared. Wait a moment.','msg.memorize':'Memorize the cards. You have a few seconds before the visible shuffle.','msg.hiding':'Hiding cards...','msg.shuffling':'Shuffling cards... follow the movement.','msg.play':'Now play. If you followed the movement, you should have real options.','msg.pairFound':'Pair found.','msg.noPair':'No pair. Tries left: {count}.','msg.completed':'You completed all 8 pairs. Time: {time} · Tries: {tries}.','msg.finished':'Game over. {matched}/{total} pairs.','msg.reset':'Game restarted. Press Start game.','msg.leftGame':'You left the game.','msg.startFailed':'Could not start the game.','victory.title':'Congratulations','victory.found':'You found all 8 pairs.','victory.time':'Time','victory.tries':'Tries'
+    'common.player':'Player','common.loading':'Preparing game...','common.close':'Close','nav.play':'Game','nav.ranking':'Ranking','nav.settings':'Settings','settings.title':'Settings','settings.audio':'Audio','settings.language':'Language','settings.languageLabel':'Game language','settings.legal':'Legal','settings.legalText':'Solitario UCM is a memory game with no betting, payments, or real prizes.','settings.privacyPolicy':'Privacy policy','settings.master':'Master','settings.music':'Music','settings.effects':'Effects','rules.title':'Game rules','rules.close':'Close rules','rules.one':'Find every matching card pair.','rules.two':'Memorize the cards, follow the shuffle, and play before you run out of tries.','rules.three':'When the game ends, your result enters the solo ranking with pairs, tries, and time.','rules.four':'Restarting or leaving before you run out of tries or complete all 8 pairs does not record the game.','rules.dontShow':'Do not show these rules again','rules.accept':'Got it','hud.round':'Round:','hud.pairs':'Pairs:','hud.tries':'Tries','hud.time':'Time','button.start':'Start game','button.newGame':'New game','button.reset':'Restart','button.exit':'Exit','ranking.emptySolo':'No games have been recorded yet.','ranking.soloTitle':'Solo ranking','ranking.tries':'{count} tries','msg.start':'Press Start game to begin.','msg.preparing':'A game is already being prepared. Wait a moment.','msg.memorize':'Memorize the cards. You have a few seconds before the visible shuffle.','msg.hiding':'Hiding cards...','msg.shuffling':'Shuffling cards... follow the movement.','msg.play':'Now play. If you followed the movement, you should have real options.','msg.pairFound':'Pair found.','msg.noPair':'No pair. Tries left: {count}.','msg.completed':'You completed all 8 pairs. Time: {time} · Tries: {tries}.','msg.finished':'Game over. {matched}/{total} pairs.','msg.reset':'Game restarted. Press Start game.','msg.leftGame':'You left the game.','msg.startFailed':'Could not start the game.','victory.title':'Congratulations','victory.found':'You found all 8 pairs.','victory.time':'Time','victory.tries':'Tries'
   },
   pt:{},
   fr:{},
