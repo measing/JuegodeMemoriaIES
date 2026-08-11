@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png?v=3" />
   <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=3" />
   <link rel="apple-touch-icon" href="assets/app-icon-192.png?v=3" />
-  <link rel="stylesheet" href="style.css?v=135" />
+  <link rel="stylesheet" href="style.css?v=136" />
 </head>
 <body>
   <div id="mobile-loading-screen" class="mobile-loading-screen" aria-hidden="true">
@@ -88,8 +88,6 @@
         </div>
         <div class="solo-account-actions" aria-label="Cuenta de jugador">
           <button id="btn-sidebar-login" type="button" data-firebase-auth-open="choice">Iniciar sesion</button>
-          <button id="btn-sidebar-logout" type="button" data-firebase-auth-action="logout" hidden>Cerrar sesion</button>
-          <button id="btn-sidebar-switch" type="button" data-firebase-auth-action="switch" hidden>Cambiar cuenta</button>
         </div>
       </section>
       <nav class="casino-menu" aria-label="Menu principal">
@@ -170,6 +168,15 @@
             <h1 id="settings-title">Configuracion</h1>
           </div>
 
+          <section class="settings-section settings-account-section" id="settings-account-section" hidden>
+            <h3>Cuenta</h3>
+            <p>Sesion activa: <strong id="settings-account-name">Jugador</strong></p>
+            <div class="settings-actions">
+              <button class="settings-action danger-action" type="button" data-firebase-auth-action="logout">Cerrar sesion</button>
+              <button class="settings-action" type="button" data-firebase-auth-action="switch">Cambiar cuenta</button>
+            </div>
+          </section>
+
           <section class="settings-section">
             <h3 id="settings-audio-heading">Audio</h3>
             <label class="volume-row">
@@ -221,7 +228,7 @@
       }, 800);
     })();
   </script>
-  <script type="module" src="main.js?v=144"></script>
+  <script type="module" src="main.js?v=145"></script>
 </body>
 </html>
 

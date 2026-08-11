@@ -2928,4 +2928,13 @@ body.guest-mode .solo-account-actions button{
   color:#d8f6ef;
   border-color:rgba(98,197,168,.52);
 }
+.settings-account-section[hidden]{
+  display:none!important;
+}
+.settings-account-section p{
+  margin-bottom:12px;
+}
+.settings-account-section strong{
+  color:white;
+}
 

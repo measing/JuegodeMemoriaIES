@@ -114,8 +114,8 @@ function renderAuthState(){
   const profileStatus = document.getElementById('solo-profile-status');
   const playerAwards = document.querySelector('.player-awards');
   const sidebarLogin = document.getElementById('btn-sidebar-login');
-  const sidebarLogout = document.getElementById('btn-sidebar-logout');
-  const sidebarSwitch = document.getElementById('btn-sidebar-switch');
+  const settingsAccount = document.getElementById('settings-account-section');
+  const settingsAccountName = document.getElementById('settings-account-name');
   const guest = firebaseState.guestMode && !user;
 
   document.body.classList.toggle('account-connected', !!user);
@@ -123,11 +123,14 @@ function renderAuthState(){
   document.documentElement.classList.toggle('account-connected', !!user);
   document.documentElement.classList.toggle('guest-mode', guest);
   if(profileName) profileName.textContent = label || (guest ? 'Invitado solitario' : 'Jugador solitario');
-  if(profileStatus) profileStatus.textContent = user ? 'Ranking Firebase activo' : (guest ? 'Ranking local de invitado' : 'Modo practica local');
+  if(profileStatus){
+    profileStatus.textContent = user ? '' : (guest ? 'Invitado' : 'Modo local');
+    profileStatus.hidden = !!user;
+  }
   if(playerAwards) playerAwards.textContent = user ? 'Ranking solitario sincronizado' : 'Ranking local de juego solitario';
   if(sidebarLogin) sidebarLogin.hidden = !!user;
-  if(sidebarLogout) sidebarLogout.hidden = !user;
-  if(sidebarSwitch) sidebarSwitch.hidden = !user;
+  if(settingsAccount) settingsAccount.hidden = !user;
+  if(settingsAccountName) settingsAccountName.textContent = label || 'Jugador';
 }
 
 function friendlyFirebaseError(error){
