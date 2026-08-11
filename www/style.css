@@ -396,6 +396,12 @@ body::before{
   border-color:#e33a2f;
   box-shadow:inset 0 0 12px rgba(255,255,255,.08),0 0 16px rgba(220,43,34,.16);
 }
+.mobile-profile-menu-item{
+  display:none!important;
+}
+.mobile-global-settings-button{
+  display:none;
+}
 .sound-controls{
   margin-top:auto;
   display:inline-flex;
@@ -3218,14 +3224,126 @@ body.guest-mode .solo-account-actions button{
   .menu-item[data-view-target="settings"] .menu-label{
     font-size:10px;
   }
+  .menu-item-settings{
+    display:none!important;
+  }
+  .mobile-profile-menu-item{
+    display:flex!important;
+  }
+  .toolbar-icon-button#btn-change-user{
+    display:none!important;
+  }
+  .mobile-global-settings-button{
+    position:fixed;
+    top:calc(12px + env(safe-area-inset-top, 0px));
+    right:calc(12px + env(safe-area-inset-right, 0px));
+    z-index:90;
+    width:50px;
+    height:50px;
+    display:grid;
+    place-items:center;
+    border:1px solid rgba(249,199,79,.58);
+    border-radius:14px;
+    background:rgba(4,12,12,.68);
+    color:white;
+    font-size:25px;
+    box-shadow:0 12px 26px rgba(0,0,0,.32),0 0 0 1px rgba(249,199,79,.18);
+    backdrop-filter:blur(8px);
+    cursor:pointer;
+  }
+  .game-toolbar .player-awards{
+    display:none!important;
+  }
+  .profile-page{
+    width:min(430px, calc(100vw - 20px));
+    padding:20px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+  }
+  .profile-summary-card{
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr);
+    align-items:center;
+    gap:12px;
+    padding:14px;
+    border:1px solid rgba(249,199,79,.28);
+    border-radius:12px;
+    background:rgba(0,0,0,.32);
+    margin-bottom:14px;
+  }
+  .profile-summary-avatar{
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    background:#10151b center/cover no-repeat;
+    box-shadow:0 0 0 2px rgba(255,210,92,.9),0 0 20px rgba(0,132,255,.22);
+  }
+  .profile-summary-copy{
+    min-width:0;
+  }
+  .profile-summary-copy h2{
+    color:white;
+    font-size:20px;
+    line-height:1.12;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .profile-summary-copy p{
+    margin-top:4px;
+    color:#d4e9f5;
+    font-size:13px;
+    font-weight:800;
+  }
+  .profile-metric-grid{
+    display:grid;
+    gap:10px;
+  }
+  .profile-metric{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:12px;
+    min-height:76px;
+    padding:14px;
+    border:1px solid rgba(255,255,255,.13);
+    border-radius:12px;
+    background:rgba(3,18,16,.52);
+  }
+  .profile-metric span{
+    color:#f3f6ee;
+    font-size:14px;
+    font-weight:900;
+    line-height:1.25;
+  }
+  .profile-metric strong{
+    color:var(--gold);
+    font-size:34px;
+    line-height:1;
+    font-variant-numeric:tabular-nums;
+  }
+  .profile-empty-state{
+    margin:14px 0 0;
+    color:#d7e8f8;
+    font-size:13px;
+    line-height:1.35;
+    text-align:center;
+  }
+  .profile-empty-state[hidden],
+  .profile-login-action[hidden]{
+    display:none!important;
+  }
+  .profile-login-action{
+    margin-top:14px;
+  }
 }
 
 @media (min-width:861px){
   body.game-round-active{
     --chalkboard-center-x:calc(50vw + clamp(120px, 11.2vw, 205px));
     --chalkboard-play-width:min(720px, calc(100vw - clamp(260px, 30vw, 410px)));
-    --shelf-ranking-left:clamp(24px, 3.2vw, 58px);
+    --chalkboard-left-x:calc(var(--chalkboard-center-x) - min(31vw, 565px));
+    --ranking-frame-gap:clamp(8px, .9vw, 16px);
     --shelf-ranking-width:clamp(188px, 16vw, 300px);
+    --shelf-ranking-left:max(24px, calc(var(--chalkboard-left-x) - var(--shelf-ranking-width) - var(--ranking-frame-gap)));
   }
   .game-round-active .game-stage{
     padding-left:0!important;
@@ -3304,7 +3422,10 @@ body.guest-mode .solo-account-actions button{
   body.game-round-active{
     --chalkboard-center-x:calc(50vw + clamp(104px, 12vw, 136px));
     --chalkboard-play-width:min(680px, calc(100vw - clamp(230px, 26vw, 320px)));
+    --chalkboard-left-x:calc(var(--chalkboard-center-x) - min(35vw, 390px));
+    --ranking-frame-gap:clamp(8px, 1vw, 12px);
     --shelf-ranking-width:clamp(170px, 19vw, 218px);
+    --shelf-ranking-left:max(18px, calc(var(--chalkboard-left-x) - var(--shelf-ranking-width) - var(--ranking-frame-gap)));
   }
   .game-round-active .board{
     --active-card-size:clamp(70px, min(11.4vh, 8.6vw), 102px)!important;

@@ -218,7 +218,11 @@ function renderAuthState(){
     profileStatus.textContent = user ? '' : (guest ? 'Invitado' : 'Modo local');
     profileStatus.hidden = !!user;
   }
-  if(playerAwards) playerAwards.textContent = user ? 'Ranking solitario sincronizado' : 'Ranking local de juego solitario';
+  if(playerAwards){
+    playerAwards.textContent = '';
+    playerAwards.hidden = true;
+    playerAwards.setAttribute('aria-hidden', 'true');
+  }
   if(sidebarLogin) sidebarLogin.hidden = !!user;
   if(settingsAccount) settingsAccount.hidden = !user;
   if(settingsAccountName) settingsAccountName.textContent = label || 'Jugador';

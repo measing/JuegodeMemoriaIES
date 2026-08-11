@@ -1,9 +1,9 @@
-﻿import { startSelectedGame, resetGame, exitGame } from './game.js?v=105';
+import { startSelectedGame, resetGame, exitGame } from './game.js?v=106';
 import { session } from './state.js?v=74';
-import { updateStats, renderLeaderboard, getSoloLeaderboard, replaceSoloLeaderboard, initRulesModal, initViewNavigation, showView, initCardSkinStore } from './ui.js?v=112';
+import { updateStats, renderLeaderboard, renderMobileProfile, getSoloLeaderboard, replaceSoloLeaderboard, initRulesModal, initViewNavigation, showView, initCardSkinStore } from './ui.js?v=113';
 import { initAudioControls } from './audio.js?v=75';
 import { initI18n, translatePage } from './i18n.js?v=9';
-import { initFirebaseIntegration } from './firebase-service.js?v=5';
+import { initFirebaseIntegration } from './firebase-service.js?v=6';
 
 window.__memorabetMainLoaded = true;
 
@@ -108,6 +108,7 @@ initI18n();
 session.currentUser = { nickname:'Modo solitario' };
 updateStats();
 renderLeaderboard();
+renderMobileProfile();
 initFirebaseIntegration({
   getLocalLeaderboard:getSoloLeaderboard,
   replaceLocalLeaderboard:ranking => replaceSoloLeaderboard(ranking, true)
@@ -116,6 +117,7 @@ initFirebaseIntegration({
 document.addEventListener('firebase-auth-change', () => {
   updateStats();
   renderLeaderboard();
+  renderMobileProfile();
 });
 
 document.addEventListener('memorabet-language-change', () => {

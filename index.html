@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png?v=3" />
   <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=3" />
   <link rel="apple-touch-icon" href="assets/app-icon-192.png?v=3" />
-  <link rel="stylesheet" href="style.css?v=142" />
+  <link rel="stylesheet" href="style.css?v=145" />
 </head>
 <body>
   <div id="mobile-loading-screen" class="mobile-loading-screen" aria-hidden="true">
@@ -73,6 +73,7 @@
       <button id="auth-submit" class="btn btn-green" type="button">Ingresar</button>
     </div>
   </div>
+  <button class="mobile-global-settings-button" type="button" data-view-target="settings" aria-label="Configuracion">&#9881;</button>
 
   <main class="casino-shell">
     <aside class="casino-sidebar">
@@ -94,7 +95,8 @@
         <button class="menu-item active" type="button" data-view-target="game" aria-current="page"><span class="menu-emoji" aria-hidden="true">&#127918;</span><span class="menu-label">Juego</span></button>
         <button class="menu-item" type="button" data-view-target="store"><span class="menu-emoji" aria-hidden="true">&#128722;</span><span class="menu-label">Tienda</span></button>
         <button class="menu-item" type="button" data-view-target="ranking"><span class="menu-emoji" aria-hidden="true">&#127942;</span><span class="menu-label">Ranking</span></button>
-        <button class="menu-item" type="button" data-view-target="settings"><span class="menu-emoji" aria-hidden="true">&#9881;</span><span class="menu-label">Configuracion</span></button>
+        <button class="menu-item menu-item-settings" type="button" data-view-target="settings"><span class="menu-emoji" aria-hidden="true">&#9881;</span><span class="menu-label">Configuracion</span></button>
+        <button class="menu-item mobile-profile-menu-item" type="button" data-view-target="profile"><span class="menu-emoji" aria-hidden="true">&#128100;</span><span class="menu-label">Perfil</span></button>
       </nav>
     </aside>
 
@@ -105,7 +107,7 @@
             <div class="player-avatar avatar-display" data-avatar-display></div>
             <div>
               <h2 id="player-name">Modo solitario</h2>
-              <p class="player-awards">Ranking local de juego solitario</p>
+              <p class="player-awards" hidden aria-hidden="true"></p>
             </div>
           </section>
 
@@ -172,6 +174,34 @@
             <h1>Ranking solitario</h1>
           </div>
           <div id="leaderboard-list" class="ranking-list page-list"><p class="empty">Aun nadie completa los 8 pares.</p></div>
+        </div>
+      </section>
+
+      <section class="screen-view page-view mobile-profile-view" id="profile-view" data-view="profile">
+        <div class="view-panel profile-page">
+          <div class="view-heading">
+            <span aria-hidden="true">&#128100;</span>
+            <h1>Perfil</h1>
+          </div>
+          <section class="profile-summary-card" aria-label="Resumen del perfil solitario">
+            <div class="profile-summary-avatar avatar-display" data-avatar-display></div>
+            <div class="profile-summary-copy">
+              <h2 id="profile-panel-name">Jugador solitario</h2>
+              <p>Resumen de partidas completadas</p>
+            </div>
+          </section>
+          <section class="profile-metric-grid" aria-label="Estadisticas del perfil">
+            <article class="profile-metric">
+              <span>Partidas completadas</span>
+              <strong id="profile-completed-games">0</strong>
+            </article>
+            <article class="profile-metric">
+              <span>Promedio de pares por partida completada</span>
+              <strong id="profile-average-pairs">0</strong>
+            </article>
+          </section>
+          <p class="profile-empty-state" id="profile-empty-state">Completa una partida para ver tus estadisticas.</p>
+          <button class="settings-action profile-login-action" type="button" data-firebase-auth-open="choice">Iniciar sesion para sincronizar</button>
         </div>
       </section>
 
@@ -242,7 +272,7 @@
       }, 800);
     })();
   </script>
-  <script type="module" src="main.js?v=146"></script>
+  <script type="module" src="main.js?v=147"></script>
 </body>
 </html>
 

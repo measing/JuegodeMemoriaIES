@@ -1,8 +1,8 @@
-﻿import { K_MAX, TOTAL_PAIRS } from './constants.js?v=73';
+import { K_MAX, TOTAL_PAIRS } from './constants.js?v=73';
 import { gameState, session } from './state.js?v=74';
 import { escapeHTML } from './utils.js?v=73';
 import { t } from './i18n.js?v=8';
-import { syncFirebaseLeaderboardEntry } from './firebase-service.js?v=5';
+import { syncFirebaseLeaderboardEntry } from './firebase-service.js?v=6';
 
 const SOLO_LEADERBOARD_KEY = 'memorabetSoloLeaderboard';
 const DEFAULT_AVATAR = 'assets/avatars/avatar-01.png';
@@ -237,6 +237,7 @@ export function replaceSoloLeaderboard(ranking, shouldRender = true){
   localStorage.setItem(SOLO_LEADERBOARD_KEY, JSON.stringify(normalized));
   session.cachedLeaderboard = normalized;
   if(shouldRender) renderLeaderboard(normalized);
+  renderMobileProfile(normalized);
   return normalized;
 }
 
@@ -281,6 +282,31 @@ export function renderLeaderboard(ranking = getSoloLeaderboard()){
   `;
 }
 
+function getCompletedPairCount(entry){
+  const explicitPairs = Number(entry?.pairs ?? entry?.pares ?? entry?.matchedPairs);
+  return Number.isFinite(explicitPairs) ? Math.max(0, Math.min(TOTAL_PAIRS, explicitPairs)) : TOTAL_PAIRS;
+}
+
+export function renderMobileProfile(ranking = session.cachedLeaderboard?.length ? session.cachedLeaderboard : getSoloLeaderboard()){
+  const name = session.currentUser?.nickname || t('common.player');
+  const normalized = normalizeSoloLeaderboard(ranking);
+  const completedGames = normalized.length;
+  const totalPairs = normalized.reduce((sum, entry) => sum + getCompletedPairCount(entry), 0);
+  const averagePairs = completedGames ? totalPairs / completedGames : 0;
+
+  const nameEl = document.getElementById('profile-panel-name');
+  const gamesEl = document.getElementById('profile-completed-games');
+  const averageEl = document.getElementById('profile-average-pairs');
+  const emptyEl = document.getElementById('profile-empty-state');
+  const loginEl = document.querySelector('.profile-login-action');
+
+  if(nameEl) nameEl.textContent = name;
+  if(gamesEl) gamesEl.textContent = String(completedGames);
+  if(averageEl) averageEl.textContent = completedGames ? averagePairs.toFixed(1).replace('.', ',') : '0';
+  if(emptyEl) emptyEl.hidden = completedGames > 0;
+  if(loginEl) loginEl.hidden = !!session.firebaseUser;
+}
+
 export function showVictoryAnimation({ tiempoMs, intentos }){
   const old = document.getElementById('victory-overlay');
   if(old) old.remove();
@@ -320,6 +346,7 @@ export function showView(viewName){
 
   if(target === 'ranking') renderLeaderboard();
   if(target === 'store') renderCardSkinStore();
+  if(target === 'profile') renderMobileProfile();
 }
 
 export function initViewNavigation(){
