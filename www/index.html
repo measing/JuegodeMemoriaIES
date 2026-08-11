@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png?v=3" />
   <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=3" />
   <link rel="apple-touch-icon" href="assets/app-icon-192.png?v=3" />
-  <link rel="stylesheet" href="style.css?v=133" />
+  <link rel="stylesheet" href="style.css?v=134" />
 </head>
 <body>
   <div id="mobile-loading-screen" class="mobile-loading-screen" aria-hidden="true">
@@ -54,13 +54,33 @@
     </div>
   </div>
 
+  <div id="auth-modal" class="nickname-modal solo-auth-modal" style="display:none" aria-hidden="true">
+    <button id="auth-back" class="auth-back-button" type="button">Volver</button>
+    <div class="nickname-box auth-box solo-auth-box" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+      <div class="solo-auth-mark" aria-hidden="true"></div>
+      <h2 id="auth-title">Solitario UCM</h2>
+      <p id="auth-copy">Sincroniza tu ranking solitario o vuelve al juego local cuando quieras.</p>
+      <div class="auth-tabs" id="auth-tabs">
+        <button id="tab-login" class="auth-tab" type="button" data-firebase-auth-mode="login">Iniciar sesion</button>
+        <button id="tab-register" class="auth-tab" type="button" data-firebase-auth-mode="create">Crear cuenta</button>
+        <button id="auth-google-choice" class="auth-tab auth-google-choice" type="button" data-firebase-auth-action="google">Entrar con Google</button>
+      </div>
+      <input type="text" id="auth-nickname" placeholder="Nombre de jugador" autocomplete="nickname" />
+      <input type="email" id="auth-email" placeholder="Correo electronico" autocomplete="email" />
+      <input type="password" id="auth-password" placeholder="Contrasena" autocomplete="current-password" />
+      <div id="nickname-error" class="auth-error" aria-live="polite"></div>
+      <button id="auth-submit" class="btn btn-green" type="button">Ingresar</button>
+      <button id="auth-close" class="btn btn-orange auth-close-game" type="button">Volver al juego</button>
+    </div>
+  </div>
+
   <main class="casino-shell">
     <aside class="casino-sidebar">
       <section class="solo-sidebar-profile" aria-label="Perfil de jugador solitario">
         <div class="solo-profile-avatar" data-avatar-display></div>
         <div class="solo-profile-copy">
-          <strong>Jugador solitario</strong>
-          <span>Modo practica local</span>
+          <strong id="solo-profile-name">Jugador solitario</strong>
+          <span id="solo-profile-status">Modo practica local</span>
         </div>
         <div class="solo-profile-stats" aria-label="Estadisticas solitarias">
           <span><b>8</b><small>pares</small></span>
@@ -100,7 +120,12 @@
 
         <section class="board-wrapper">
           <div class="start-game-panel" id="start-game-panel">
-            <div class="start-actions">
+          <div class="start-actions">
+              <div class="start-auth-actions" id="start-auth-actions">
+                <button class="start-auth-button" type="button" data-firebase-auth-open="login">Iniciar sesion</button>
+                <button class="start-auth-button google" type="button" data-firebase-auth-action="google">Google</button>
+                <button class="start-auth-button" type="button" data-firebase-auth-open="create">Crear cuenta</button>
+              </div>
               <button class="start-game-button" id="btn-start-center" type="button">Comenzar juego</button>
               <p class="selected-mode-label" id="selected-mode-label">Modo solitario</p>
             </div>
@@ -154,21 +179,9 @@
               <button class="settings-action danger-action" type="button" data-firebase-auth-action="logout">Cerrar sesion</button>
             </div>
             <div id="firebase-auth-panel" class="firebase-auth-panel">
-              <label class="firebase-auth-field">
-                <span>Nombre</span>
-                <input id="firebase-display-name" type="text" autocomplete="nickname" placeholder="Jugador solitario" />
-              </label>
-              <label class="firebase-auth-field">
-                <span>Correo</span>
-                <input id="firebase-email" type="email" autocomplete="email" placeholder="correo@ejemplo.com" />
-              </label>
-              <label class="firebase-auth-field">
-                <span>Contrasena</span>
-                <input id="firebase-password" type="password" autocomplete="current-password" placeholder="Minimo 6 caracteres" />
-              </label>
               <div class="firebase-auth-actions">
-                <button class="settings-action" type="button" data-firebase-auth-action="create">Crear cuenta</button>
-                <button class="settings-action" type="button" data-firebase-auth-action="login">Iniciar sesion</button>
+                <button class="settings-action" type="button" data-firebase-auth-open="create">Crear cuenta</button>
+                <button class="settings-action" type="button" data-firebase-auth-open="login">Iniciar sesion</button>
                 <button class="settings-action google-action" type="button" data-firebase-auth-action="google">Google</button>
               </div>
             </div>
@@ -225,7 +238,7 @@
       }, 800);
     })();
   </script>
-  <script type="module" src="main.js?v=142"></script>
+  <script type="module" src="main.js?v=143"></script>
 </body>
 </html>
 

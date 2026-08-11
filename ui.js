@@ -2,7 +2,7 @@
 import { gameState, session } from './state.js?v=74';
 import { escapeHTML } from './utils.js?v=73';
 import { t } from './i18n.js?v=8';
-import { syncFirebaseLeaderboardEntry } from './firebase-service.js?v=1';
+import { syncFirebaseLeaderboardEntry } from './firebase-service.js?v=2';
 
 const SOLO_LEADERBOARD_KEY = 'memorabetSoloLeaderboard';
 const DEFAULT_AVATAR = 'assets/avatars/avatar-01.png';

@@ -2802,3 +2802,64 @@ body:not(.game-round-active) .bottom-hud{
   }
 }
 
+.solo-auth-modal{
+  background:linear-gradient(180deg,rgba(7,18,16,.64),rgba(2,5,6,.82)),var(--ucm-page-background);
+  background-size:cover;
+  background-position:center;
+}
+.solo-auth-box{
+  gap:10px;
+  background:linear-gradient(180deg,rgba(10,31,27,.96),rgba(5,12,14,.98));
+  border-color:rgba(249,199,79,.9);
+  border-radius:18px;
+}
+.solo-auth-mark{
+  width:86px;
+  aspect-ratio:1;
+  border-radius:18px;
+  background-image:var(--card-back-skin);
+  background-size:cover;
+  background-position:center;
+  box-shadow:0 0 0 2px rgba(249,199,79,.8),0 16px 36px rgba(0,0,0,.34);
+}
+.solo-auth-box h2{
+  margin-top:2px;
+  color:#f6d979;
+}
+.solo-auth-box p{
+  max-width:34ch;
+}
+.solo-auth-box input{
+  outline:none;
+}
+.solo-auth-box input:focus{
+  border-color:rgba(249,199,79,.8)!important;
+  box-shadow:0 0 0 3px rgba(249,199,79,.14);
+}
+.solo-auth-box .auth-error{
+  color:#ffd0d0;
+}
+.auth-close-game{
+  width:100%;
+  min-height:42px;
+  margin-top:0;
+}
+.auth-modal-open .casino-shell{
+  filter:saturate(.92);
+}
+@media(max-width:680px){
+  .start-auth-actions{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+  .start-auth-button{
+    min-height:42px;
+  }
+  .solo-auth-box{
+    padding:22px;
+  }
+  .solo-auth-mark{
+    width:72px;
+  }
+}
+

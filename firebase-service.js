@@ -25,6 +25,7 @@ const firebaseState = {
   cloudLeaderboard:[],
   ready:false,
   initError:null,
+  authMode:'choice',
   callbacks:{
     getLocalLeaderboard:() => [],
     replaceLocalLeaderboard:() => {}
@@ -88,11 +89,21 @@ function setStatus(message, type = 'info'){
   status.className = `firebase-auth-status ${type}`;
 }
 
+function setAuthError(message = ''){
+  const error = document.getElementById('nickname-error');
+  if(error) error.textContent = message;
+}
+
 function setAuthBusy(isBusy){
   document.querySelectorAll('[data-firebase-auth-action]').forEach(button => {
     button.disabled = !!isBusy;
     button.classList.toggle('btn-disabled', !!isBusy);
   });
+  const submit = document.getElementById('auth-submit');
+  if(submit){
+    submit.disabled = !!isBusy;
+    submit.classList.toggle('btn-disabled', !!isBusy);
+  }
 }
 
 function renderAuthState(){
@@ -100,14 +111,19 @@ function renderAuthState(){
   const signedIn = document.getElementById('firebase-user-panel');
   const userLabel = document.getElementById('firebase-user-label');
   const user = firebaseState.currentUser;
+  const label = user ? (user.displayName || user.email || 'Jugador conectado') : '';
+  const profileName = document.getElementById('solo-profile-name');
+  const profileStatus = document.getElementById('solo-profile-status');
+  const playerAwards = document.querySelector('.player-awards');
 
   if(signedOut) signedOut.hidden = !!user;
   if(signedIn) signedIn.hidden = !user;
-  if(userLabel){
-    userLabel.textContent = user
-      ? (user.displayName || user.email || 'Usuario conectado')
-      : 'Sin sesion';
-  }
+  if(userLabel) userLabel.textContent = label || 'Sin sesion';
+  document.body.classList.toggle('account-connected', !!user);
+  document.documentElement.classList.toggle('account-connected', !!user);
+  if(profileName) profileName.textContent = label || 'Jugador solitario';
+  if(profileStatus) profileStatus.textContent = user ? 'Ranking Firebase activo' : 'Modo practica local';
+  if(playerAwards) playerAwards.textContent = user ? 'Ranking solitario sincronizado' : 'Ranking local de juego solitario';
 }
 
 function friendlyFirebaseError(error){
@@ -130,6 +146,72 @@ function friendlyFirebaseError(error){
   if(code.includes('auth/weak-password')) return 'La contrasena debe tener al menos 6 caracteres.';
   if(code.includes('PERMISSION_DENIED')) return 'Firebase rechazo la escritura. Revisa las reglas de Realtime Database.';
   return error?.message || 'Firebase no esta disponible. El juego local sigue activo.';
+}
+
+function setAuthMode(mode = 'choice'){
+  firebaseState.authMode = mode;
+  const isChoice = mode === 'choice';
+  const isCreate = mode === 'create';
+  const isLogin = mode === 'login';
+  const tabs = document.getElementById('auth-tabs');
+  const loginTab = document.getElementById('tab-login');
+  const registerTab = document.getElementById('tab-register');
+  const back = document.getElementById('auth-back');
+  const nickname = document.getElementById('auth-nickname');
+  const email = document.getElementById('auth-email');
+  const password = document.getElementById('auth-password');
+  const submit = document.getElementById('auth-submit');
+  const copy = document.getElementById('auth-copy');
+
+  if(tabs) tabs.classList.toggle('choice-mode', isChoice);
+  loginTab?.classList.toggle('active', isLogin);
+  registerTab?.classList.toggle('active', isCreate);
+  if(back) back.style.display = isChoice ? 'none' : 'inline-flex';
+  if(nickname) nickname.style.display = isCreate ? 'block' : 'none';
+  if(email) email.style.display = isChoice ? 'none' : 'block';
+  if(password) password.style.display = isChoice ? 'none' : 'block';
+  if(submit){
+    submit.style.display = isChoice ? 'none' : 'flex';
+    submit.textContent = isCreate ? 'Crear cuenta' : 'Iniciar sesion';
+  }
+  if(copy){
+    if(isCreate) copy.textContent = 'Crea una cuenta para sincronizar tu ranking solitario.';
+    else if(isLogin) copy.textContent = 'Ingresa con tu correo para recuperar tu ranking solitario.';
+    else copy.textContent = 'Sincroniza tu ranking solitario o vuelve al juego local cuando quieras.';
+  }
+  setAuthError('');
+}
+
+function showAuthModal(mode = 'choice'){
+  const modal = document.getElementById('auth-modal');
+  if(!modal) return;
+  document.body.classList.add('auth-modal-open');
+  modal.style.display = 'flex';
+  modal.setAttribute('aria-hidden', 'false');
+  setAuthMode(mode);
+  window.setTimeout(() => {
+    const target = mode === 'create'
+      ? document.getElementById('auth-nickname')
+      : document.getElementById('auth-email');
+    target?.focus();
+  }, 40);
+}
+
+function hideAuthModal(){
+  const modal = document.getElementById('auth-modal');
+  if(!modal) return;
+  document.body.classList.remove('auth-modal-open');
+  modal.style.display = 'none';
+  modal.setAttribute('aria-hidden', 'true');
+  setAuthError('');
+}
+
+function getAuthFields(){
+  return {
+    email:document.getElementById('auth-email')?.value.trim() || '',
+    password:document.getElementById('auth-password')?.value || '',
+    displayName:document.getElementById('auth-nickname')?.value.trim() || ''
+  };
 }
 
 async function loadFirebaseModules(){
@@ -193,6 +275,8 @@ async function handleAuthUser(user){
   if(user){
     session.currentUser = { nickname:user.displayName || user.email || 'Jugador' };
     setStatus('Sesion iniciada. Ranking sincronizado con tu usuario.', 'success');
+    setAuthError('');
+    hideAuthModal();
     renderAuthState();
     watchUserRanking();
     await syncLocalRankingToCloud().catch(error => setStatus(friendlyFirebaseError(error), 'danger'));
@@ -211,10 +295,9 @@ async function handleAuthUser(user){
 }
 
 async function createEmailAccount(){
-  const email = document.getElementById('firebase-email')?.value.trim();
-  const password = document.getElementById('firebase-password')?.value;
-  const displayName = document.getElementById('firebase-display-name')?.value.trim();
+  const { email, password, displayName } = getAuthFields();
   if(!email || !password) throw new Error('Ingresa correo y contrasena.');
+  if(displayName && (displayName.length < 3 || displayName.length > 24)) throw new Error('El nombre debe tener entre 3 y 24 caracteres.');
   const { createUserWithEmailAndPassword, updateProfile } = firebaseState.authApi;
   const credential = await createUserWithEmailAndPassword(firebaseState.auth, email, password);
   if(displayName) await updateProfile(credential.user, { displayName });
@@ -222,8 +305,7 @@ async function createEmailAccount(){
 }
 
 async function signInWithEmail(){
-  const email = document.getElementById('firebase-email')?.value.trim();
-  const password = document.getElementById('firebase-password')?.value;
+  const { email, password } = getAuthFields();
   if(!email || !password) throw new Error('Ingresa correo y contrasena.');
   const { signInWithEmailAndPassword } = firebaseState.authApi;
   await signInWithEmailAndPassword(firebaseState.auth, email, password);
@@ -241,8 +323,12 @@ async function signOutUser(){
 }
 
 async function runAuthAction(action){
+  if(action === 'google' && document.getElementById('auth-modal')?.style.display !== 'flex'){
+    showAuthModal('choice');
+  }
   if(!firebaseState.ready){
     setStatus('Firebase no esta disponible. Revisa la red y vuelve a intentar.', 'warning');
+    setAuthError('Firebase no esta disponible. Puedes volver al juego local.');
     return;
   }
   setAuthBusy(true);
@@ -252,7 +338,9 @@ async function runAuthAction(action){
     if(action === 'google') await signInWithGoogle();
     if(action === 'logout') await signOutUser();
   }catch(error){
-    setStatus(friendlyFirebaseError(error), 'danger');
+    const message = friendlyFirebaseError(error);
+    setStatus(message, 'danger');
+    setAuthError(message);
   }finally{
     setAuthBusy(false);
   }
@@ -262,6 +350,24 @@ function bindAuthUI(){
   document.querySelectorAll('[data-firebase-auth-action]').forEach(button => {
     button.addEventListener('click', () => runAuthAction(button.dataset.firebaseAuthAction));
   });
+  document.querySelectorAll('[data-firebase-auth-open]').forEach(button => {
+    button.addEventListener('click', () => showAuthModal(button.dataset.firebaseAuthOpen || 'choice'));
+  });
+  document.querySelectorAll('[data-firebase-auth-mode]').forEach(button => {
+    button.addEventListener('click', () => setAuthMode(button.dataset.firebaseAuthMode || 'choice'));
+  });
+  document.getElementById('auth-submit')?.addEventListener('click', () => {
+    runAuthAction(firebaseState.authMode === 'create' ? 'create' : 'login');
+  });
+  document.getElementById('auth-back')?.addEventListener('click', () => setAuthMode('choice'));
+  document.getElementById('auth-close')?.addEventListener('click', hideAuthModal);
+  document.getElementById('auth-modal')?.addEventListener('click', event => {
+    if(event.target?.id === 'auth-modal') hideAuthModal();
+  });
+  document.addEventListener('keydown', event => {
+    if(event.key === 'Escape' && document.getElementById('auth-modal')?.style.display === 'flex') hideAuthModal();
+  });
+  setAuthMode('choice');
   renderAuthState();
 }
 
