@@ -26,6 +26,7 @@ const firebaseState = {
   ready:false,
   initError:null,
   authMode:'choice',
+  guestMode:false,
   callbacks:{
     getLocalLeaderboard:() => [],
     replaceLocalLeaderboard:() => {}
@@ -107,23 +108,26 @@ function setAuthBusy(isBusy){
 }
 
 function renderAuthState(){
-  const signedOut = document.getElementById('firebase-auth-panel');
-  const signedIn = document.getElementById('firebase-user-panel');
-  const userLabel = document.getElementById('firebase-user-label');
   const user = firebaseState.currentUser;
   const label = user ? (user.displayName || user.email || 'Jugador conectado') : '';
   const profileName = document.getElementById('solo-profile-name');
   const profileStatus = document.getElementById('solo-profile-status');
   const playerAwards = document.querySelector('.player-awards');
+  const sidebarLogin = document.getElementById('btn-sidebar-login');
+  const sidebarLogout = document.getElementById('btn-sidebar-logout');
+  const sidebarSwitch = document.getElementById('btn-sidebar-switch');
+  const guest = firebaseState.guestMode && !user;
 
-  if(signedOut) signedOut.hidden = !!user;
-  if(signedIn) signedIn.hidden = !user;
-  if(userLabel) userLabel.textContent = label || 'Sin sesion';
   document.body.classList.toggle('account-connected', !!user);
+  document.body.classList.toggle('guest-mode', guest);
   document.documentElement.classList.toggle('account-connected', !!user);
-  if(profileName) profileName.textContent = label || 'Jugador solitario';
-  if(profileStatus) profileStatus.textContent = user ? 'Ranking Firebase activo' : 'Modo practica local';
+  document.documentElement.classList.toggle('guest-mode', guest);
+  if(profileName) profileName.textContent = label || (guest ? 'Invitado solitario' : 'Jugador solitario');
+  if(profileStatus) profileStatus.textContent = user ? 'Ranking Firebase activo' : (guest ? 'Ranking local de invitado' : 'Modo practica local');
   if(playerAwards) playerAwards.textContent = user ? 'Ranking solitario sincronizado' : 'Ranking local de juego solitario';
+  if(sidebarLogin) sidebarLogin.hidden = !!user;
+  if(sidebarLogout) sidebarLogout.hidden = !user;
+  if(sidebarSwitch) sidebarSwitch.hidden = !user;
 }
 
 function friendlyFirebaseError(error){
@@ -163,7 +167,10 @@ function setAuthMode(mode = 'choice'){
   const submit = document.getElementById('auth-submit');
   const copy = document.getElementById('auth-copy');
 
-  if(tabs) tabs.classList.toggle('choice-mode', isChoice);
+  if(tabs){
+    tabs.style.display = isChoice ? 'grid' : 'none';
+    tabs.classList.toggle('choice-mode', isChoice);
+  }
   loginTab?.classList.toggle('active', isLogin);
   registerTab?.classList.toggle('active', isCreate);
   if(back) back.style.display = isChoice ? 'none' : 'inline-flex';
@@ -177,7 +184,7 @@ function setAuthMode(mode = 'choice'){
   if(copy){
     if(isCreate) copy.textContent = 'Crea una cuenta para sincronizar tu ranking solitario.';
     else if(isLogin) copy.textContent = 'Ingresa con tu correo para recuperar tu ranking solitario.';
-    else copy.textContent = 'Sincroniza tu ranking solitario o vuelve al juego local cuando quieras.';
+    else copy.textContent = 'Guarda tu ranking solitario y recuperalo cuando vuelvas a jugar.';
   }
   setAuthError('');
 }
@@ -190,7 +197,9 @@ function showAuthModal(mode = 'choice'){
   modal.setAttribute('aria-hidden', 'false');
   setAuthMode(mode);
   window.setTimeout(() => {
-    const target = mode === 'create'
+    const target = mode === 'choice'
+      ? document.getElementById('tab-login')
+      : mode === 'create'
       ? document.getElementById('auth-nickname')
       : document.getElementById('auth-email');
     target?.focus();
@@ -198,12 +207,22 @@ function showAuthModal(mode = 'choice'){
 }
 
 function hideAuthModal(){
+  if(!firebaseState.currentUser && !firebaseState.guestMode) return;
   const modal = document.getElementById('auth-modal');
   if(!modal) return;
   document.body.classList.remove('auth-modal-open');
   modal.style.display = 'none';
   modal.setAttribute('aria-hidden', 'true');
   setAuthError('');
+}
+
+function enterGuestMode(){
+  firebaseState.guestMode = true;
+  session.firebaseUser = null;
+  session.currentUser = { nickname:'Invitado solitario', isGuest:true };
+  hideAuthModal();
+  renderAuthState();
+  document.dispatchEvent(new CustomEvent('firebase-auth-change', { detail:{ user:null, guest:true } }));
 }
 
 function getAuthFields(){
@@ -273,6 +292,7 @@ async function handleAuthUser(user){
   } : null;
 
   if(user){
+    firebaseState.guestMode = false;
     session.currentUser = { nickname:user.displayName || user.email || 'Jugador' };
     setStatus('Sesion iniciada. Ranking sincronizado con tu usuario.', 'success');
     setAuthError('');
@@ -286,9 +306,12 @@ async function handleAuthUser(user){
       firebaseState.unsubscribeRanking = null;
     }
     firebaseState.cloudLeaderboard = [];
-    session.currentUser = { nickname:'Modo solitario' };
+    session.currentUser = firebaseState.guestMode
+      ? { nickname:'Invitado solitario', isGuest:true }
+      : { nickname:'Modo solitario' };
     setStatus(firebaseState.ready ? 'Sin sesion. El ranking queda guardado localmente.' : 'Firebase no disponible. Juego local activo.', firebaseState.ready ? 'info' : 'warning');
     renderAuthState();
+    if(!firebaseState.guestMode) window.setTimeout(() => showAuthModal('choice'), 80);
   }
 
   document.dispatchEvent(new CustomEvent('firebase-auth-change', { detail:{ user:session.firebaseUser } }));
@@ -336,7 +359,11 @@ async function runAuthAction(action){
     if(action === 'create') await createEmailAccount();
     if(action === 'login') await signInWithEmail();
     if(action === 'google') await signInWithGoogle();
-    if(action === 'logout') await signOutUser();
+    if(action === 'logout' || action === 'switch'){
+      firebaseState.guestMode = false;
+      await signOutUser();
+      showAuthModal('choice');
+    }
   }catch(error){
     const message = friendlyFirebaseError(error);
     setStatus(message, 'danger');
@@ -360,7 +387,8 @@ function bindAuthUI(){
     runAuthAction(firebaseState.authMode === 'create' ? 'create' : 'login');
   });
   document.getElementById('auth-back')?.addEventListener('click', () => setAuthMode('choice'));
-  document.getElementById('auth-close')?.addEventListener('click', hideAuthModal);
+  document.getElementById('auth-guest')?.addEventListener('click', enterGuestMode);
+  document.getElementById('auth-close')?.addEventListener('click', enterGuestMode);
   document.getElementById('auth-modal')?.addEventListener('click', event => {
     if(event.target?.id === 'auth-modal') hideAuthModal();
   });
@@ -369,6 +397,7 @@ function bindAuthUI(){
   });
   setAuthMode('choice');
   renderAuthState();
+  showAuthModal('choice');
 }
 
 export async function initFirebaseIntegration(callbacks = {}){
@@ -394,6 +423,8 @@ export async function initFirebaseIntegration(callbacks = {}){
     firebaseState.ready = false;
     session.firebaseReady = false;
     setStatus('Firebase no disponible. El juego y ranking local siguen activos.', 'warning');
+    showAuthModal('choice');
+    setAuthError('Firebase no esta disponible. Puedes jugar como invitado e intentarlo despues.');
   }
 }
 

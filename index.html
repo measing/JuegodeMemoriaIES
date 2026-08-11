@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png?v=3" />
   <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=3" />
   <link rel="apple-touch-icon" href="assets/app-icon-192.png?v=3" />
-  <link rel="stylesheet" href="style.css?v=134" />
+  <link rel="stylesheet" href="style.css?v=135" />
 </head>
 <body>
   <div id="mobile-loading-screen" class="mobile-loading-screen" aria-hidden="true">
@@ -56,21 +56,21 @@
 
   <div id="auth-modal" class="nickname-modal solo-auth-modal" style="display:none" aria-hidden="true">
     <button id="auth-back" class="auth-back-button" type="button">Volver</button>
+    <button id="auth-guest" class="btn-guest" type="button">Jugar como invitado</button>
     <div class="nickname-box auth-box solo-auth-box" role="dialog" aria-modal="true" aria-labelledby="auth-title">
       <div class="solo-auth-mark" aria-hidden="true"></div>
       <h2 id="auth-title">Solitario UCM</h2>
-      <p id="auth-copy">Sincroniza tu ranking solitario o vuelve al juego local cuando quieras.</p>
+      <p id="auth-copy">Guarda tu ranking solitario y recuperalo cuando vuelvas a jugar.</p>
       <div class="auth-tabs" id="auth-tabs">
         <button id="tab-login" class="auth-tab" type="button" data-firebase-auth-mode="login">Iniciar sesion</button>
         <button id="tab-register" class="auth-tab" type="button" data-firebase-auth-mode="create">Crear cuenta</button>
-        <button id="auth-google-choice" class="auth-tab auth-google-choice" type="button" data-firebase-auth-action="google">Entrar con Google</button>
+        <button id="auth-google-choice" class="auth-tab auth-google-choice" type="button" data-firebase-auth-action="google">Ingresar con Google</button>
       </div>
       <input type="text" id="auth-nickname" placeholder="Nombre de jugador" autocomplete="nickname" />
       <input type="email" id="auth-email" placeholder="Correo electronico" autocomplete="email" />
       <input type="password" id="auth-password" placeholder="Contrasena" autocomplete="current-password" />
       <div id="nickname-error" class="auth-error" aria-live="polite"></div>
       <button id="auth-submit" class="btn btn-green" type="button">Ingresar</button>
-      <button id="auth-close" class="btn btn-orange auth-close-game" type="button">Volver al juego</button>
     </div>
   </div>
 
@@ -85,6 +85,11 @@
         <div class="solo-profile-stats" aria-label="Estadisticas solitarias">
           <span><b>8</b><small>pares</small></span>
           <span><b>10</b><small>intentos</small></span>
+        </div>
+        <div class="solo-account-actions" aria-label="Cuenta de jugador">
+          <button id="btn-sidebar-login" type="button" data-firebase-auth-open="choice">Iniciar sesion</button>
+          <button id="btn-sidebar-logout" type="button" data-firebase-auth-action="logout" hidden>Cerrar sesion</button>
+          <button id="btn-sidebar-switch" type="button" data-firebase-auth-action="switch" hidden>Cambiar cuenta</button>
         </div>
       </section>
       <nav class="casino-menu" aria-label="Menu principal">
@@ -120,12 +125,7 @@
 
         <section class="board-wrapper">
           <div class="start-game-panel" id="start-game-panel">
-          <div class="start-actions">
-              <div class="start-auth-actions" id="start-auth-actions">
-                <button class="start-auth-button" type="button" data-firebase-auth-open="login">Iniciar sesion</button>
-                <button class="start-auth-button google" type="button" data-firebase-auth-action="google">Google</button>
-                <button class="start-auth-button" type="button" data-firebase-auth-open="create">Crear cuenta</button>
-              </div>
+            <div class="start-actions">
               <button class="start-game-button" id="btn-start-center" type="button">Comenzar juego</button>
               <p class="selected-mode-label" id="selected-mode-label">Modo solitario</p>
             </div>
@@ -169,23 +169,6 @@
             <span aria-hidden="true">&#9881;</span>
             <h1 id="settings-title">Configuracion</h1>
           </div>
-
-          <section class="settings-section firebase-account-section">
-            <h3>Cuenta y ranking en linea</h3>
-            <p>Inicia sesion para sincronizar tu ranking solitario en Firebase. Si Firebase no esta disponible, el juego seguira usando el ranking local.</p>
-            <div id="firebase-auth-status" class="firebase-auth-status info" aria-live="polite">Firebase se conectara al cargar.</div>
-            <div id="firebase-user-panel" class="firebase-user-panel" hidden>
-              <p>Sesion activa: <strong id="firebase-user-label">Usuario conectado</strong></p>
-              <button class="settings-action danger-action" type="button" data-firebase-auth-action="logout">Cerrar sesion</button>
-            </div>
-            <div id="firebase-auth-panel" class="firebase-auth-panel">
-              <div class="firebase-auth-actions">
-                <button class="settings-action" type="button" data-firebase-auth-open="create">Crear cuenta</button>
-                <button class="settings-action" type="button" data-firebase-auth-open="login">Iniciar sesion</button>
-                <button class="settings-action google-action" type="button" data-firebase-auth-action="google">Google</button>
-              </div>
-            </div>
-          </section>
 
           <section class="settings-section">
             <h3 id="settings-audio-heading">Audio</h3>
@@ -238,7 +221,7 @@
       }, 800);
     })();
   </script>
-  <script type="module" src="main.js?v=143"></script>
+  <script type="module" src="main.js?v=144"></script>
 </body>
 </html>
 

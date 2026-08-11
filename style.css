@@ -2863,3 +2863,69 @@ body:not(.game-round-active) .bottom-hud{
   }
 }
 
+.solo-auth-modal .auth-tabs.choice-mode{
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  margin:18px 0 8px;
+}
+.solo-auth-modal .auth-tabs.choice-mode .auth-tab{
+  min-height:58px;
+  border-radius:12px;
+  font-size:16px;
+  background:linear-gradient(180deg,rgba(19,120,194,.92),rgba(6,57,105,.96));
+  border-color:rgba(130,205,255,.75);
+  color:white;
+  box-shadow:0 14px 28px rgba(0,0,0,.24);
+}
+.solo-auth-modal .auth-tabs.choice-mode #tab-register{
+  background:linear-gradient(180deg,rgba(14,92,72,.94),rgba(4,46,39,.96));
+  border-color:rgba(249,199,79,.72);
+}
+.solo-auth-modal .auth-tabs.choice-mode .auth-google-choice{
+  background:#f8fbff;
+  border-color:#f8fbff;
+  color:#132032;
+}
+.solo-auth-modal #auth-submit{
+  width:100%;
+  min-height:54px;
+  margin-top:8px;
+}
+.solo-auth-modal .btn-guest{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:#ffe18b;
+}
+.solo-account-actions{
+  width:100%;
+  display:grid;
+  gap:8px;
+  margin-top:4px;
+}
+.solo-account-actions button{
+  min-height:36px;
+  border:1px solid rgba(249,199,79,.48);
+  border-radius:10px;
+  background:rgba(255,255,255,.06);
+  color:#f7f1dc;
+  font-weight:900;
+  cursor:pointer;
+}
+.solo-account-actions button:hover{
+  border-color:rgba(249,199,79,.82);
+  background:rgba(249,199,79,.13);
+}
+.solo-account-actions button[hidden]{
+  display:none;
+}
+body.account-connected .solo-account-actions{
+  grid-template-columns:1fr;
+}
+body.guest-mode .solo-account-actions button{
+  color:#d8f6ef;
+  border-color:rgba(98,197,168,.52);
+}
+
