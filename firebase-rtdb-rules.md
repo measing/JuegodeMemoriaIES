@@ -29,6 +29,13 @@ La app usa Firebase Web SDK modular para Authentication y Realtime Database. No 
         ".write": false
       }
     },
+    "publicSoloLeaderboard": {
+      ".read": true,
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['alias', 'pairs', 'tiempoMs', 'intentos', 'score', 'updatedAt']) && newData.child('alias').isString() && newData.child('pairs').isNumber() && newData.child('pairs').val() >= 0 && newData.child('pairs').val() <= 8 && newData.child('tiempoMs').isNumber() && newData.child('tiempoMs').val() >= 0 && newData.child('intentos').isNumber() && newData.child('intentos').val() >= 1 && newData.child('intentos').val() <= 10 && newData.child('score').isNumber() && newData.child('updatedAt').isNumber()"
+      }
+    },
     ".read": false,
     ".write": false
   }
@@ -38,6 +45,8 @@ La app usa Firebase Web SDK modular para Authentication y Realtime Database. No 
 ## Rutas usadas por la app
 
 - Ranking sincronizado por usuario: `users/{uid}/soloLeaderboard`.
-- Ranking global publico: la app actual no escribe aqui; queda solo lectura para una futura vista global.
+- Ranking global publico en tiempo real: `publicSoloLeaderboard/{uid}`.
 
-Si Firebase no esta disponible o el usuario no inicia sesion, el juego conserva el ranking local en el navegador.
+La entrada global solo guarda alias visible, pares, tiempo, intentos, puntuacion y timestamp. No guarda correos ni datos privados en el valor publicado. La clave de la entrada usa el UID autenticado para que las reglas puedan impedir que un usuario sobrescriba la entrada de otro.
+
+Si Firebase no esta disponible o el usuario no inicia sesion, el juego conserva el ranking local en el navegador y el panel en vivo muestra el fallback local.

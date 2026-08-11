@@ -3,6 +3,8 @@ import { escapeHTML } from './utils.js?v=73';
 
 const FIREBASE_CDN_VERSION = '12.17.1';
 const USER_RANKING_LIMIT = 20;
+const GLOBAL_RANKING_LIMIT = 8;
+const GLOBAL_RANKING_PATH = 'publicSoloLeaderboard';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBlS57whvjjsE3TLCYIP04zbemXealon6Q",
@@ -22,7 +24,9 @@ const firebaseState = {
   dbApi:null,
   currentUser:null,
   unsubscribeRanking:null,
+  unsubscribeGlobalRanking:null,
   cloudLeaderboard:[],
+  globalLeaderboard:[],
   ready:false,
   initError:null,
   authMode:'choice',
@@ -35,6 +39,20 @@ const firebaseState = {
 
 function byBestScore(a, b){
   return Number(a.intentos) - Number(b.intentos) || Number(a.tiempoMs) - Number(b.tiempoMs);
+}
+
+function byGlobalScore(a, b){
+  return Number(b.pairs || 0) - Number(a.pairs || 0)
+    || Number(a.intentos || 999) - Number(b.intentos || 999)
+    || Number(a.tiempoMs || Number.MAX_SAFE_INTEGER) - Number(b.tiempoMs || Number.MAX_SAFE_INTEGER)
+    || Number(b.updatedAt || 0) - Number(a.updatedAt || 0);
+}
+
+function formatDuration(ms){
+  const totalSeconds = Math.max(0, Math.floor(Number(ms || 0) / 1000));
+  const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+  const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+  return `${minutes}:${seconds}`;
 }
 
 function normalizeEntry(entry){
@@ -62,6 +80,35 @@ function normalizeRanking(value){
     .slice(0, USER_RANKING_LIMIT);
 }
 
+function safeAlias(value){
+  const raw = String(value || 'Jugador').split('@')[0].replace(/[^a-zA-Z0-9 _.-]/g, '').trim();
+  return (raw || 'Jugador').slice(0, 24);
+}
+
+function normalizeGlobalEntry(entry){
+  const tiempoMs = Number(entry?.tiempoMs);
+  const intentos = Number(entry?.intentos);
+  const pairs = Number(entry?.pairs);
+  if(!Number.isFinite(tiempoMs) || !Number.isFinite(intentos) || !Number.isFinite(pairs)) return null;
+  return {
+    alias:safeAlias(entry?.alias),
+    pairs:Math.max(0, Math.min(8, Math.round(pairs))),
+    tiempoMs:Math.max(0, tiempoMs),
+    intentos:Math.max(1, intentos),
+    score:Number(entry?.score || 0),
+    updatedAt:Number(entry?.updatedAt || entry?.completedAt || 0)
+  };
+}
+
+function normalizeGlobalRanking(value){
+  const rawEntries = Array.isArray(value) ? value : Object.values(value || {});
+  return rawEntries
+    .map(normalizeGlobalEntry)
+    .filter(Boolean)
+    .sort(byGlobalScore)
+    .slice(0, GLOBAL_RANKING_LIMIT);
+}
+
 function mergeRankings(...rankings){
   const byId = new Map();
   rankings.flat().forEach(entry => {
@@ -83,11 +130,55 @@ function currentUserRankingPath(){
   return uid ? `users/${uid}/soloLeaderboard` : '';
 }
 
+function currentGlobalRankingPath(){
+  const uid = firebaseState.currentUser?.uid;
+  return uid ? `${GLOBAL_RANKING_PATH}/${uid}` : '';
+}
+
 function setStatus(message, type = 'info'){
   const status = document.getElementById('firebase-auth-status');
   if(!status) return;
   status.textContent = message;
   status.className = `firebase-auth-status ${type}`;
+}
+
+function setLiveStatus(message){
+  const status = document.getElementById('live-ranking-status');
+  if(status) status.textContent = message;
+}
+
+function renderLiveLeaderboard(ranking = firebaseState.globalLeaderboard, isLocal = false){
+  const list = document.getElementById('live-global-ranking-list');
+  if(!list) return;
+  const normalized = normalizeGlobalRanking(ranking);
+  firebaseState.globalLeaderboard = normalized;
+  if(!normalized.length){
+    list.innerHTML = '<li class="live-ranking-empty">Sin resultados todavia.</li>';
+    setLiveStatus(isLocal ? 'Ranking local de este navegador.' : 'Esperando resultados de Firebase.');
+    return;
+  }
+  list.innerHTML = normalized.map((entry, index) => `
+    <li class="live-ranking-row">
+      <span class="live-ranking-pos">${index + 1}</span>
+      <span class="live-ranking-name">${escapeHTML(entry.alias)}</span>
+      <span class="live-ranking-score">${entry.pairs}/8</span>
+      <small>${formatDuration(entry.tiempoMs)} · ${Number(entry.intentos)} int.</small>
+    </li>
+  `).join('');
+  setLiveStatus(isLocal ? 'Modo local hasta conectar Firebase.' : 'Actualizado desde Firebase.');
+}
+
+function renderLocalLiveFallback(){
+  const local = firebaseState.callbacks.getLocalLeaderboard()
+    .map(item => ({
+      alias:safeAlias(item?.name || session.currentUser?.nickname || 'Jugador'),
+      pairs:8,
+      tiempoMs:Number(item?.tiempoMs || 0),
+      intentos:Number(item?.intentos || 0),
+      score:8000 - Number(item?.intentos || 0) * 10,
+      updatedAt:Number(item?.completedAt || 0)
+    }));
+  renderLiveLeaderboard(local, true);
 }
 
 function setAuthError(message = ''){
@@ -253,6 +344,25 @@ async function writeUserRanking(ranking){
   await set(ref(firebaseState.db, path), rankingToDatabaseValue(ranking));
 }
 
+async function writeGlobalBestEntry(bestEntry){
+  if(!firebaseState.ready || !firebaseState.currentUser || !bestEntry) return;
+  const normalized = normalizeEntry(bestEntry);
+  if(!normalized) return;
+  const path = currentGlobalRankingPath();
+  if(!path) return;
+  const alias = safeAlias(firebaseState.currentUser.displayName || firebaseState.currentUser.email || normalized.name);
+  const publicEntry = {
+    alias,
+    pairs:8,
+    tiempoMs:Number(normalized.tiempoMs),
+    intentos:Number(normalized.intentos),
+    score:Math.max(0, 8000 - Number(normalized.intentos) * 100 - Math.floor(Number(normalized.tiempoMs) / 1000)),
+    updatedAt:Number(normalized.completedAt || Date.now())
+  };
+  const { ref, set } = firebaseState.dbApi;
+  await set(ref(firebaseState.db, path), publicEntry);
+}
+
 async function syncLocalRankingToCloud(){
   if(!firebaseState.ready || !firebaseState.currentUser) return;
   const local = firebaseState.callbacks.getLocalLeaderboard();
@@ -260,6 +370,22 @@ async function syncLocalRankingToCloud(){
   firebaseState.cloudLeaderboard = merged;
   firebaseState.callbacks.replaceLocalLeaderboard(merged);
   await writeUserRanking(merged);
+  await writeGlobalBestEntry(merged[0]).catch(error => setLiveStatus(friendlyFirebaseError(error)));
+}
+
+function watchGlobalRanking(){
+  if(firebaseState.unsubscribeGlobalRanking){
+    firebaseState.unsubscribeGlobalRanking();
+    firebaseState.unsubscribeGlobalRanking = null;
+  }
+  if(!firebaseState.ready) return;
+  const { ref, onValue } = firebaseState.dbApi;
+  firebaseState.unsubscribeGlobalRanking = onValue(ref(firebaseState.db, GLOBAL_RANKING_PATH), snapshot => {
+    renderLiveLeaderboard(normalizeGlobalRanking(snapshot.val()), false);
+  }, error => {
+    setLiveStatus(friendlyFirebaseError(error));
+    renderLocalLiveFallback();
+  });
 }
 
 function watchUserRanking(){
@@ -348,6 +474,16 @@ async function signOutUser(){
   await signOut(firebaseState.auth);
 }
 
+function bindLiveRankingUI(){
+  const toggle = document.getElementById('live-ranking-toggle');
+  if(!toggle) return;
+  toggle.addEventListener('click', () => {
+    const isOpen = !document.body.classList.contains('live-ranking-open');
+    document.body.classList.toggle('live-ranking-open', isOpen);
+    toggle.setAttribute('aria-expanded', String(isOpen));
+  });
+}
+
 async function runAuthAction(action){
   if(action === 'google' && document.getElementById('auth-modal')?.style.display !== 'flex'){
     showAuthModal('choice');
@@ -377,6 +513,7 @@ async function runAuthAction(action){
 }
 
 function bindAuthUI(){
+  bindLiveRankingUI();
   document.querySelectorAll('[data-firebase-auth-action]').forEach(button => {
     button.addEventListener('click', () => runAuthAction(button.dataset.firebaseAuthAction));
   });
@@ -400,6 +537,7 @@ function bindAuthUI(){
   });
   setAuthMode('choice');
   renderAuthState();
+  renderLocalLiveFallback();
   showAuthModal('choice');
 }
 
@@ -417,6 +555,7 @@ export async function initFirebaseIntegration(callbacks = {}){
     firebaseState.dbApi = dbMod;
     firebaseState.ready = true;
     session.firebaseReady = true;
+    watchGlobalRanking();
     authMod.onAuthStateChanged(firebaseState.auth, user => {
       handleAuthUser(user).catch(error => setStatus(friendlyFirebaseError(error), 'danger'));
     });
@@ -438,9 +577,11 @@ export function syncFirebaseLeaderboardEntry(entry){
   const merged = mergeRankings(firebaseState.cloudLeaderboard, firebaseState.callbacks.getLocalLeaderboard(), [normalized]);
   firebaseState.cloudLeaderboard = merged;
   return writeUserRanking(merged)
+    .then(() => writeGlobalBestEntry(merged[0]))
     .then(() => true)
     .catch(error => {
       setStatus(friendlyFirebaseError(error), 'danger');
+      setLiveStatus(friendlyFirebaseError(error));
       return false;
     });
 }

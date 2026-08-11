@@ -1,5 +1,5 @@
 ﻿import { ANIMAL_CARDS, K_MAX, TOTAL_PAIRS } from './constants.js?v=73';
-import { gameState } from './state.js?v=74';
+import { gameState, session } from './state.js?v=74';
 import { shuffle, wait } from './utils.js?v=73';
 import {
   renderBoard,
@@ -14,7 +14,7 @@ import {
   addSoloLeaderboardEntry,
   renderLeaderboard,
   showRulesModalIfNeeded
-} from './ui.js?v=111';
+} from './ui.js?v=112';
 import { playCardFlip, playShuffle, playMatch, playMiss } from './audio.js?v=75';
 import { t } from './i18n.js?v=8';
 
@@ -248,7 +248,7 @@ export function endGame(){
 
   if(completed){
     addSoloLeaderboardEntry({
-      name:t('common.player'),
+      name:session.currentUser?.nickname || t('common.player'),
       tiempoMs,
       intentos:gameState.intentos,
       completedAt:Date.now()

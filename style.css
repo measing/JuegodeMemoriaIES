@@ -2938,3 +2938,272 @@ body.guest-mode .solo-account-actions button{
   color:white;
 }
 
+/* Chalkboard-constrained gameplay layout and live ranking */
+.game-view{
+  position:relative;
+}
+.toolbar-icon-button#btn-change-user{
+  position:fixed;
+  top:calc(18px + env(safe-area-inset-top, 0px));
+  right:calc(18px + env(safe-area-inset-right, 0px));
+  z-index:90;
+  width:54px;
+  height:54px;
+  border-radius:14px;
+  font-size:27px;
+  background:rgba(4,12,12,.68);
+  backdrop-filter:blur(8px);
+  box-shadow:0 12px 26px rgba(0,0,0,.32),0 0 0 1px rgba(249,199,79,.18);
+}
+.live-ranking-panel{
+  display:none;
+  box-sizing:border-box;
+  border:1px solid rgba(249,199,79,.36);
+  border-radius:12px;
+  background:rgba(4,18,15,.72);
+  box-shadow:0 16px 32px rgba(0,0,0,.32);
+  backdrop-filter:blur(8px);
+  color:white;
+  overflow:hidden;
+}
+.game-round-active .live-ranking-panel{
+  display:block;
+}
+.live-ranking-toggle{
+  display:none;
+}
+.live-ranking-content{
+  display:grid;
+  gap:8px;
+  padding:12px;
+}
+.live-ranking-heading{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:var(--gold);
+  font-size:12px;
+  font-weight:950;
+  text-transform:uppercase;
+  line-height:1.15;
+}
+.live-ranking-heading span{
+  font-size:18px;
+}
+.live-ranking-list{
+  display:grid;
+  gap:6px;
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+.live-ranking-row{
+  display:grid;
+  grid-template-columns:24px 1fr auto;
+  gap:6px;
+  align-items:center;
+  padding:7px 0;
+  border-top:1px solid rgba(255,255,255,.10);
+}
+.live-ranking-row small{
+  grid-column:2 / 4;
+  color:#cfe2df;
+  font-size:11px;
+  font-weight:750;
+}
+.live-ranking-pos{
+  width:22px;
+  height:22px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:rgba(249,199,79,.16);
+  color:var(--gold);
+  font-weight:950;
+  font-size:12px;
+}
+.live-ranking-name{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:13px;
+  font-weight:900;
+}
+.live-ranking-score{
+  color:#8dffae;
+  font-size:13px;
+  font-weight:950;
+}
+.live-ranking-empty,
+.live-ranking-status{
+  color:#cfe2df;
+  font-size:11px;
+  line-height:1.3;
+}
+.live-ranking-empty{
+  padding:10px 0;
+}
+@media (min-width:861px){
+  .game-round-active .game-view{
+    transform:none!important;
+    width:min(1080px, calc(100vw - 320px));
+    max-width:1080px;
+    min-width:0;
+    margin-inline:auto;
+    padding-right:clamp(154px, 15vw, 205px);
+    box-sizing:border-box;
+  }
+  .game-round-active .top-hud,
+  .game-round-active .board-wrapper,
+  .game-round-active .bottom-hud{
+    width:min(680px, 100%);
+    max-width:100%;
+    margin-left:auto;
+    margin-right:auto;
+  }
+  .game-round-active .top-hud{
+    gap:clamp(110px, 16vw, 250px);
+  }
+  .game-round-active .board{
+    --active-card-size:clamp(76px, min(12.8vh, 8.4vw), 120px);
+  }
+  .live-ranking-panel{
+    position:absolute;
+    top:88px;
+    right:0;
+    width:clamp(145px, 14vw, 196px);
+    max-height:min(56vh, 430px);
+  }
+}
+@media (min-width:861px) and (max-width:1180px){
+  .game-round-active .game-view{
+    width:min(980px, calc(100vw - 40px));
+    padding-right:150px;
+  }
+  .game-round-active .board{
+    --active-card-size:clamp(74px, min(12vh, 9vw), 108px);
+  }
+  .game-round-active .bottom-hud{
+    grid-template-columns:88px 88px repeat(3,minmax(96px,1fr));
+    gap:8px;
+  }
+}
+@media (max-width:860px){
+  .toolbar-icon-button#btn-change-user{
+    width:50px;
+    height:50px;
+    top:calc(12px + env(safe-area-inset-top, 0px));
+    right:calc(12px + env(safe-area-inset-right, 0px));
+    font-size:25px;
+  }
+  .game-round-active .game-view{
+    width:100%;
+    max-width:min(440px, calc(100vw - 20px));
+    margin-inline:auto;
+  }
+  .game-round-active .top-hud,
+  .game-round-active .board-wrapper,
+  .game-round-active .bottom-hud{
+    width:100%;
+    max-width:100%;
+  }
+  .game-round-active .board{
+    width:100%;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+  .live-ranking-panel{
+    position:fixed;
+    top:calc(74px + env(safe-area-inset-top, 0px));
+    right:10px;
+    z-index:70;
+    width:min(286px, calc(100vw - 20px));
+    transform:translateX(calc(100% - 44px));
+    transition:transform .22s ease;
+  }
+  .live-ranking-toggle{
+    display:flex;
+    width:44px;
+    min-height:128px;
+    align-items:center;
+    justify-content:center;
+    padding:8px 4px;
+    border:0;
+    border-right:1px solid rgba(249,199,79,.28);
+    background:rgba(10,54,43,.92);
+    color:var(--gold);
+    font-size:12px;
+    font-weight:950;
+    writing-mode:vertical-rl;
+    text-transform:uppercase;
+    cursor:pointer;
+  }
+  .live-ranking-content{
+    position:absolute;
+    top:0;
+    left:44px;
+    right:0;
+    min-height:100%;
+    background:rgba(4,18,15,.94);
+  }
+  body.live-ranking-open .live-ranking-panel{
+    transform:translateX(0);
+  }
+}
+
+@media (max-width:860px){
+  .casino-shell{
+    padding-bottom:calc(82px + env(safe-area-inset-bottom, 0px))!important;
+  }
+  .game-round-active .game-stage{
+    padding-bottom:calc(84px + env(safe-area-inset-bottom, 0px))!important;
+  }
+  .casino-menu{
+    position:fixed!important;
+    left:0!important;
+    right:0!important;
+    top:auto!important;
+    bottom:0!important;
+    z-index:80;
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    align-items:center;
+    gap:4px!important;
+    min-height:64px;
+    max-height:74px;
+    margin:0!important;
+    padding:8px max(8px, env(safe-area-inset-left, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-right, 0px))!important;
+    overflow:hidden;
+    transform:none!important;
+  }
+  .menu-item{
+    width:auto!important;
+    min-width:0;
+    min-height:48px!important;
+    height:48px!important;
+    max-height:48px!important;
+    padding:5px 3px!important;
+    flex-direction:column;
+    justify-content:center;
+    gap:3px!important;
+    border-radius:8px!important;
+    font-size:11px!important;
+    line-height:1.05;
+    white-space:nowrap!important;
+  }
+  .menu-emoji{
+    flex:0 0 auto!important;
+    font-size:17px!important;
+  }
+  .menu-label{
+    display:block;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .menu-item[data-view-target="settings"] .menu-label{
+    font-size:10px;
+  }
+}
+
