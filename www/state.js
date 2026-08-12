@@ -1,6 +1,7 @@
 export const session = {
   currentUser: null,
-  cachedLeaderboard: []
+  cachedLeaderboard: [],
+  sharedLeaderboard: []
 };
 
 export const gameState = {
@@ -16,7 +17,8 @@ export const gameState = {
   endTime:0,
   gameToken:0,
   resultRecorded:false,
-  resultId:''
+  resultId:'',
+  liveStatus:'idle'
 };
 
 export function resetGameState(){
@@ -33,4 +35,5 @@ export function resetGameState(){
   gameState.gameToken++;
   gameState.resultRecorded = false;
   gameState.resultId = '';
+  gameState.liveStatus = 'idle';
 }

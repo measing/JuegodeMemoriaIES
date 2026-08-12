@@ -3118,7 +3118,7 @@ body.guest-mode .solo-account-actions button{
   grid-template-columns:42px minmax(0,1fr) auto;
   gap:10px;
   align-items:center;
-  padding:13px 0;
+  padding:14px 0;
   border-top:1px solid rgba(255,255,255,.10);
 }
 .live-ranking-copy{
@@ -3468,7 +3468,7 @@ body.guest-mode .solo-account-actions button{
     --chalkboard-play-width:min(720px, calc(100vw - clamp(260px, 30vw, 410px)));
     --chalkboard-left-x:calc(var(--chalkboard-center-x) - min(31vw, 565px));
     --ranking-frame-gap:clamp(8px, .9vw, 16px);
-    --shelf-ranking-width:clamp(280px, 22vw, 340px);
+    --shelf-ranking-width:clamp(320px, 24vw, 360px);
     --shelf-ranking-left:max(24px, calc(var(--chalkboard-left-x) - var(--shelf-ranking-width) - var(--ranking-frame-gap)));
   }
   .game-round-active .game-stage{
@@ -3511,7 +3511,7 @@ body.guest-mode .solo-account-actions button{
     left:var(--shelf-ranking-left)!important;
     right:auto!important;
     top:clamp(118px, 15.5vh, 164px)!important;
-    width:var(--shelf-ranking-width)!important;
+    width:min(360px, var(--shelf-ranking-width))!important;
     max-width:calc(100vw - 40px);
     height:clamp(360px, 64vh, 610px);
     max-height:calc(100vh - 210px);
@@ -3544,7 +3544,7 @@ body.guest-mode .solo-account-actions button{
     --chalkboard-play-width:min(680px, calc(100vw - clamp(230px, 26vw, 320px)));
     --chalkboard-left-x:calc(var(--chalkboard-center-x) - min(35vw, 390px));
     --ranking-frame-gap:clamp(8px, 1vw, 12px);
-    --shelf-ranking-width:clamp(238px, 24vw, 280px);
+    --shelf-ranking-width:clamp(260px, 25vw, 300px);
     --shelf-ranking-left:max(18px, calc(var(--chalkboard-left-x) - var(--shelf-ranking-width) - var(--ranking-frame-gap)));
   }
   .game-round-active .board{

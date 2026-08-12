@@ -1,8 +1,8 @@
 import { K_MAX, TOTAL_PAIRS } from './constants.js?v=73';
-import { gameState, session } from './state.js?v=75';
+import { gameState, session } from './state.js?v=76';
 import { escapeHTML } from './utils.js?v=73';
 import { t } from './i18n.js?v=10';
-import { syncFirebaseLeaderboardEntry } from './firebase-service.js?v=11';
+import { syncFirebaseLeaderboardEntry } from './firebase-service.js?v=12';
 
 const SOLO_LEADERBOARD_KEY = 'memorabetSoloLeaderboard';
 const SOLO_STATS_KEY = 'memorabetSoloStats';
@@ -322,6 +322,13 @@ export function replaceSoloLeaderboard(ranking, shouldRender = true){
   return normalized;
 }
 
+export function setSharedLeaderboard(ranking, shouldRender = true){
+  const normalized = normalizeSoloLeaderboard(ranking);
+  session.sharedLeaderboard = normalized;
+  if(shouldRender) renderLeaderboard(normalized);
+  return normalized;
+}
+
 export function addSoloLeaderboardEntry(entry){
   const completedAt = Number(entry?.completedAt) || Date.now();
   const savedEntry = normalizeSoloGameResult({
@@ -341,7 +348,7 @@ export function addSoloLeaderboardEntry(entry){
   return ranking;
 }
 
-export function renderLeaderboard(ranking = getSoloLeaderboard()){
+export function renderLeaderboard(ranking = session.sharedLeaderboard?.length ? session.sharedLeaderboard : getSoloLeaderboard()){
   const list = document.getElementById('leaderboard-list');
   if(!list) return;
 

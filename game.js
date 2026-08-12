@@ -1,5 +1,5 @@
-﻿import { ANIMAL_CARDS, K_MAX, TOTAL_PAIRS } from './constants.js?v=73';
-import { gameState, session } from './state.js?v=75';
+import { ANIMAL_CARDS, K_MAX, TOTAL_PAIRS } from './constants.js?v=73';
+import { gameState, session } from './state.js?v=76';
 import { shuffle, wait } from './utils.js?v=73';
 import {
   renderBoard,
@@ -14,7 +14,7 @@ import {
   addSoloLeaderboardEntry,
   renderLeaderboard,
   showRulesModalIfNeeded
-} from './ui.js?v=117';
+} from './ui.js?v=118';
 import { playCardFlip, playShuffle, playMatch, playMiss } from './audio.js?v=75';
 import { t } from './i18n.js?v=10';
 
@@ -23,6 +23,24 @@ const VISIBLE_SHUFFLE_SWAPS = [
   [1, 8], [6, 14], [4, 11], [9, 13],
   [5, 10], [2, 7], [0, 12], [3, 15]
 ];
+
+function dispatchSoloProgress(status = gameState.liveStatus || 'playing'){
+  if(!gameState.resultId) return;
+  gameState.liveStatus = status;
+  const now = Date.now();
+  document.dispatchEvent(new CustomEvent('solo-progress-update', {
+    detail:{
+      id:gameState.resultId,
+      name:session.currentUser?.nickname || t('common.player'),
+      pairs:gameState.matched,
+      intentos:gameState.intentos,
+      tiempoMs:gameState.startTime ? Math.max(0, now - gameState.startTime) : 0,
+      status,
+      completed:gameState.matched === TOTAL_PAIRS,
+      updatedAt:now
+    }
+  }));
+}
 
 function buildDeck(){
   return shuffle([...ANIMAL_CARDS, ...ANIMAL_CARDS]).map((animal, index) => ({
@@ -133,10 +151,12 @@ async function prepareGame(){
   gameState.endTime = 0;
   gameState.resultRecorded = false;
   gameState.resultId = `${token}-${Date.now()}`;
+  gameState.liveStatus = 'preparing';
 
   setNewGameButtonBusy(true);
   renderBoard(flipCard);
   updateStats();
+  dispatchSoloProgress('preparing');
   showRulesModalIfNeeded();
   showMsg(t('msg.memorize'), 'info');
 
@@ -158,9 +178,11 @@ async function prepareGame(){
   gameState.blocked = false;
   gameState.starting = false;
   gameState.startTime = Date.now();
+  gameState.liveStatus = 'playing';
   setNewGameButtonBusy(false);
   renderBoard(flipCard);
   updateStats();
+  dispatchSoloProgress('playing');
   showMsg(t('msg.play'), 'success');
 }
 
@@ -194,6 +216,7 @@ export function flipCard(id){
   gameState.blocked = true;
   gameState.intentos++;
   updateStats();
+  dispatchSoloProgress('playing');
 
   const [a, b] = gameState.flipped.map(index => gameState.cards[index]);
   if(a.animalId === b.animalId){
@@ -209,6 +232,7 @@ export function flipCard(id){
       gameState.blocked = false;
       renderBoard(flipCard);
       updateStats();
+      dispatchSoloProgress('playing');
 
       if(gameState.matched === TOTAL_PAIRS) endGame();
       else showMsg(t('msg.pairFound'), 'success');
@@ -232,7 +256,10 @@ export function flipCard(id){
     wB?.classList.remove('wrong', 'flipped');
 
     if(gameState.intentos >= K_MAX) endGame();
-    else showMsg(t('msg.noPair', { count:K_MAX - gameState.intentos }), 'warning');
+    else{
+      dispatchSoloProgress('playing');
+      showMsg(t('msg.noPair', { count:K_MAX - gameState.intentos }), 'warning');
+    }
   }, 820);
 }
 
@@ -258,6 +285,7 @@ export function endGame(){
     completed,
     completedAt:Date.now()
   });
+  dispatchSoloProgress(completed ? 'completed' : 'finished');
   renderLeaderboard(savedRanking);
 
   if(completed){
@@ -278,6 +306,8 @@ export function endGame(){
 }
 
 export function resetGame(){
+  const shouldMarkLeft = gameState.resultId && !gameState.resultRecorded && (gameState.starting || gameState.playing || gameState.cards.length > 0);
+  if(shouldMarkLeft) dispatchSoloProgress('left');
   gameState.gameToken++;
   gameState.playing = false;
   gameState.blocked = false;
@@ -290,6 +320,7 @@ export function resetGame(){
   gameState.endTime = 0;
   gameState.resultRecorded = false;
   gameState.resultId = '';
+  gameState.liveStatus = 'idle';
   setNewGameButtonBusy(false);
   clearBoard();
   updateStats();
