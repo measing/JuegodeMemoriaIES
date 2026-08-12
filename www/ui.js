@@ -2,7 +2,7 @@ import { K_MAX, TOTAL_PAIRS } from './constants.js?v=73';
 import { gameState, session } from './state.js?v=76';
 import { escapeHTML } from './utils.js?v=73';
 import { t } from './i18n.js?v=10';
-import { syncFirebaseLeaderboardEntry } from './firebase-service.js?v=12';
+import { syncFirebaseLeaderboardEntry } from './firebase-service.js?v=14';
 
 const SOLO_LEADERBOARD_KEY = 'memorabetSoloLeaderboard';
 const SOLO_STATS_KEY = 'memorabetSoloStats';
@@ -239,7 +239,7 @@ function normalizeSoloLeaderboard(ranking){
     .map(normalizeSoloGameResult)
     .filter(Boolean)
     .sort((a, b) => Number(b.pairs || 0) - Number(a.pairs || 0) || Number(a.intentos) - Number(b.intentos) || Number(a.tiempoMs) - Number(b.tiempoMs))
-    .slice(0, 20);
+    .slice(0, 40);
 }
 
 function deriveSoloStats(ranking = getSoloLeaderboard()){

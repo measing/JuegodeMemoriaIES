@@ -3,7 +3,7 @@ import { escapeHTML } from './utils.js?v=73';
 
 const FIREBASE_CDN_VERSION = '12.17.1';
 const USER_RANKING_LIMIT = 20;
-const GLOBAL_RANKING_LIMIT = 8;
+const GLOBAL_RANKING_LIMIT = 40;
 const GLOBAL_RANKING_PATH = 'publicSoloResults';
 const LIVE_RANKING_PATH = 'publicSoloLive';
 const LIVE_TTL_MS = 45000;
@@ -219,7 +219,7 @@ function normalizeLiveEntry(entry){
   const updatedAt = Number(entry?.updatedAt || 0);
   if(!updatedAt || Date.now() - updatedAt > LIVE_TTL_MS) return null;
   const status = String(entry?.status || 'playing');
-  if(status === 'left') return null;
+  if(status !== 'preparing' && status !== 'playing') return null;
   const tiempoMs = Number(entry?.tiempoMs);
   const intentos = Number(entry?.intentos);
   const pairs = Number(entry?.pairs);
@@ -250,7 +250,6 @@ function normalizeLiveRanking(value){
 
 function getCombinedPublicRanking(){
   const byKey = new Map();
-  firebaseState.globalLeaderboard.forEach(entry => byKey.set(`result:${entry.id}`, entry));
   if(firebaseState.localProgressEntry) byKey.set(`live:${firebaseState.localProgressEntry.id}`, firebaseState.localProgressEntry);
   firebaseState.liveLeaderboard.forEach(entry => {
     byKey.set(`live:${entry.id}`, entry);
@@ -259,10 +258,11 @@ function getCombinedPublicRanking(){
 }
 
 function refreshSharedRankings(){
-  const combined = getCombinedPublicRanking();
-  renderLiveLeaderboard(combined, false);
-  const shared = combined.map(publicEntryToLeaderboard).filter(Boolean);
-  firebaseState.callbacks.setSharedLeaderboard(shared, true);
+  const live = getCombinedPublicRanking();
+  renderLiveLeaderboard(live, false);
+  const sharedResults = firebaseState.globalLeaderboard.map(publicEntryToLeaderboard).filter(Boolean);
+  const mergedShared = mergeRankings(sharedResults, firebaseState.callbacks.getLocalLeaderboard());
+  firebaseState.callbacks.setSharedLeaderboard(mergedShared, true);
 }
 
 function renderLiveLeaderboard(ranking = getCombinedPublicRanking(), isLocal = false){
@@ -293,26 +293,14 @@ function renderLiveLeaderboard(ranking = getCombinedPublicRanking(), isLocal = f
 }
 
 function renderLocalLiveFallback(){
-  const local = firebaseState.callbacks.getLocalLeaderboard()
-    .map(item => ({
-      id:String(item?.id || item?.completedAt || Date.now()),
-      alias:safeAlias(item?.name || session.currentUser?.nickname || 'Jugador'),
-      pairs:Math.max(0, Math.min(8, Math.round(Number(item?.pairs ?? item?.pares ?? item?.matchedPairs ?? 8)))),
-      tiempoMs:Number(item?.tiempoMs || 0),
-      intentos:Number(item?.intentos || 0),
-      score:Math.max(0, Math.max(0, Math.min(8, Math.round(Number(item?.pairs ?? item?.pares ?? item?.matchedPairs ?? 8)))) * 1000 - Number(item?.intentos || 0) * 100 - Math.floor(Number(item?.tiempoMs || 0) / 1000)),
-      updatedAt:Number(item?.completedAt || 0)
-    }))
-    .sort(byGlobalScore)
-    .slice(0, GLOBAL_RANKING_LIMIT);
-  renderLiveLeaderboard(local, true);
-  firebaseState.callbacks.setSharedLeaderboard(local.map(publicEntryToLeaderboard).filter(Boolean), true);
+  refreshSharedRankings();
 }
 
 function renderLocalProgressFallback(progress = {}){
-  if(String(progress?.status || '') === 'left'){
+  const status = String(progress?.status || 'playing');
+  if(status !== 'preparing' && status !== 'playing'){
     firebaseState.localProgressEntry = null;
-    renderLocalLiveFallback();
+    refreshSharedRankings();
     return;
   }
   firebaseState.localProgressEntry = normalizeLiveEntry({
@@ -321,7 +309,7 @@ function renderLocalProgressFallback(progress = {}){
     pairs:progress.pairs,
     tiempoMs:progress.tiempoMs,
     intentos:progress.intentos,
-    status:progress.status || 'playing',
+    status,
     updatedAt:progress.updatedAt || Date.now()
   });
   refreshSharedRankings();
@@ -565,7 +553,7 @@ async function writeLiveProgress(progress){
     updatedAt:Number(progress.updatedAt || Date.now())
   };
   const { ref, set, remove } = firebaseState.dbApi;
-  if(entry.status === 'left'){
+  if(entry.status !== 'preparing' && entry.status !== 'playing'){
     await remove(ref(firebaseState.db, path));
     return true;
   }
@@ -581,7 +569,7 @@ async function syncLocalRankingToCloud(){
   firebaseState.callbacks.replaceLocalLeaderboard(merged);
   await writeUserRanking(merged);
   await writeUserStats(firebaseState.callbacks.getLocalStats()).catch(error => setStatus(friendlyFirebaseError(error), 'danger'));
-  await Promise.all(merged.slice(0, GLOBAL_RANKING_LIMIT).map(entry => writeGlobalResultEntry(entry))).catch(error => setStatus(friendlyFirebaseError(error), 'warning'));
+  await Promise.all(merged.map(entry => writeGlobalResultEntry(entry))).catch(error => setStatus(friendlyFirebaseError(error), 'warning'));
 }
 
 function watchGlobalRanking(){

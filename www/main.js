@@ -1,9 +1,9 @@
 import { startSelectedGame, resetGame, exitGame } from './game.js?v=109';
 import { session } from './state.js?v=76';
-import { updateStats, renderLeaderboard, renderMobileProfile, getSoloLeaderboard, replaceSoloLeaderboard, setSharedLeaderboard, getSoloStats, replaceSoloStats, initRulesModal, initViewNavigation, toggleSettingsView, initCardSkinStore } from './ui.js?v=118';
+import { updateStats, renderLeaderboard, renderMobileProfile, getSoloLeaderboard, replaceSoloLeaderboard, setSharedLeaderboard, getSoloStats, replaceSoloStats, initRulesModal, initViewNavigation, toggleSettingsView, initCardSkinStore } from './ui.js?v=119';
 import { initAudioControls } from './audio.js?v=75';
 import { initI18n, translatePage } from './i18n.js?v=10';
-import { initFirebaseIntegration } from './firebase-service.js?v=12';
+import { initFirebaseIntegration } from './firebase-service.js?v=14';
 
 window.__memorabetMainLoaded = true;
 
