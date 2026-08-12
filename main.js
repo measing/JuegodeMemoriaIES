@@ -1,9 +1,9 @@
-import { startSelectedGame, resetGame, exitGame } from './game.js?v=107';
-import { session } from './state.js?v=74';
-import { updateStats, renderLeaderboard, renderMobileProfile, getSoloLeaderboard, replaceSoloLeaderboard, initRulesModal, initViewNavigation, toggleSettingsView, initCardSkinStore } from './ui.js?v=115';
+import { startSelectedGame, resetGame, exitGame } from './game.js?v=108';
+import { session } from './state.js?v=75';
+import { updateStats, renderLeaderboard, renderMobileProfile, getSoloLeaderboard, replaceSoloLeaderboard, getSoloStats, replaceSoloStats, initRulesModal, initViewNavigation, toggleSettingsView, initCardSkinStore } from './ui.js?v=116';
 import { initAudioControls } from './audio.js?v=75';
 import { initI18n, translatePage } from './i18n.js?v=10';
-import { initFirebaseIntegration } from './firebase-service.js?v=8';
+import { initFirebaseIntegration } from './firebase-service.js?v=9';
 
 window.__memorabetMainLoaded = true;
 
@@ -111,7 +111,9 @@ renderLeaderboard();
 renderMobileProfile();
 initFirebaseIntegration({
   getLocalLeaderboard:getSoloLeaderboard,
-  replaceLocalLeaderboard:ranking => replaceSoloLeaderboard(ranking, true)
+  replaceLocalLeaderboard:ranking => replaceSoloLeaderboard(ranking, true),
+  getLocalStats:getSoloStats,
+  replaceLocalStats:stats => replaceSoloStats(stats, true)
 });
 
 document.addEventListener('firebase-auth-change', () => {

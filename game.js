@@ -1,5 +1,5 @@
 ﻿import { ANIMAL_CARDS, K_MAX, TOTAL_PAIRS } from './constants.js?v=73';
-import { gameState, session } from './state.js?v=74';
+import { gameState, session } from './state.js?v=75';
 import { shuffle, wait } from './utils.js?v=73';
 import {
   renderBoard,
@@ -14,7 +14,7 @@ import {
   addSoloLeaderboardEntry,
   renderLeaderboard,
   showRulesModalIfNeeded
-} from './ui.js?v=115';
+} from './ui.js?v=116';
 import { playCardFlip, playShuffle, playMatch, playMiss } from './audio.js?v=75';
 import { t } from './i18n.js?v=10';
 
@@ -131,6 +131,8 @@ async function prepareGame(){
   gameState.round = Math.max(1, Number(gameState.round || 1));
   gameState.startTime = 0;
   gameState.endTime = 0;
+  gameState.resultRecorded = false;
+  gameState.resultId = `${token}-${Date.now()}`;
 
   setNewGameButtonBusy(true);
   renderBoard(flipCard);
@@ -236,16 +238,19 @@ export function flipCard(id){
 
 export function endGame(){
   if(!gameState.playing && gameState.endTime) return;
+  if(gameState.resultRecorded) return;
 
   gameState.playing = false;
   gameState.blocked = true;
   gameState.starting = false;
   gameState.endTime = Date.now();
+  gameState.resultRecorded = true;
   setNewGameButtonBusy(false);
 
   const completed = gameState.matched === TOTAL_PAIRS;
   const tiempoMs = gameState.startTime ? gameState.endTime - gameState.startTime : 0;
   const savedRanking = addSoloLeaderboardEntry({
+    id:gameState.resultId || `${gameState.gameToken}-${gameState.startTime || gameState.endTime}`,
     name:session.currentUser?.nickname || t('common.player'),
     tiempoMs,
     intentos:gameState.intentos,
@@ -283,6 +288,8 @@ export function resetGame(){
   gameState.intentos = 0;
   gameState.startTime = 0;
   gameState.endTime = 0;
+  gameState.resultRecorded = false;
+  gameState.resultId = '';
   setNewGameButtonBusy(false);
   clearBoard();
   updateStats();

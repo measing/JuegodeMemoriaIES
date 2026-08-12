@@ -1,4 +1,4 @@
-import { session } from './state.js?v=74';
+import { session } from './state.js?v=75';
 import { escapeHTML } from './utils.js?v=73';
 
 const FIREBASE_CDN_VERSION = '12.17.1';
@@ -24,6 +24,7 @@ const firebaseState = {
   dbApi:null,
   currentUser:null,
   unsubscribeRanking:null,
+  unsubscribeStats:null,
   unsubscribeGlobalRanking:null,
   cloudLeaderboard:[],
   globalLeaderboard:[],
@@ -33,7 +34,9 @@ const firebaseState = {
   guestMode:false,
   callbacks:{
     getLocalLeaderboard:() => [],
-    replaceLocalLeaderboard:() => {}
+    replaceLocalLeaderboard:() => {},
+    getLocalStats:() => ({ games:0, totalPairs:0, best:0, updatedAt:0, resultIds:[] }),
+    replaceLocalStats:() => {}
   }
 };
 
@@ -135,6 +138,11 @@ function currentUserRankingPath(){
   return uid ? `users/${uid}/soloLeaderboard` : '';
 }
 
+function currentUserStatsPath(){
+  const uid = firebaseState.currentUser?.uid;
+  return uid ? `users/${uid}/soloStats` : '';
+}
+
 function currentGlobalRankingPath(){
   const uid = firebaseState.currentUser?.uid;
   return uid ? `${GLOBAL_RANKING_PATH}/${uid}` : '';
@@ -184,6 +192,19 @@ function renderLocalLiveFallback(){
       updatedAt:Number(item?.completedAt || 0)
     }));
   renderLiveLeaderboard(local, true);
+}
+
+function normalizeStats(stats = {}){
+  const games = Math.max(0, Math.round(Number(stats?.games || 0)));
+  const totalPairs = Math.max(0, Number(stats?.totalPairs || 0));
+  return {
+    games,
+    totalPairs,
+    best:Math.max(0, Math.min(8, Number(stats?.best || 0))),
+    averagePairs:games ? totalPairs / games : 0,
+    updatedAt:Number(stats?.updatedAt || 0),
+    resultIds:Array.isArray(stats?.resultIds) ? stats.resultIds.map(String).slice(0, 100) : []
+  };
 }
 
 function setAuthError(message = ''){
@@ -353,6 +374,22 @@ async function writeUserRanking(ranking){
   await set(ref(firebaseState.db, path), rankingToDatabaseValue(ranking));
 }
 
+async function writeUserStats(stats){
+  if(!firebaseState.ready || !firebaseState.currentUser) return;
+  const path = currentUserStatsPath();
+  if(!path) return;
+  const normalized = normalizeStats(stats);
+  const { ref, set } = firebaseState.dbApi;
+  await set(ref(firebaseState.db, path), {
+    games:normalized.games,
+    totalPairs:normalized.totalPairs,
+    best:normalized.best,
+    averagePairs:normalized.averagePairs,
+    updatedAt:normalized.updatedAt || Date.now(),
+    resultIds:normalized.resultIds
+  });
+}
+
 async function writeGlobalBestEntry(bestEntry){
   if(!firebaseState.ready || !firebaseState.currentUser || !bestEntry) return;
   const normalized = normalizeEntry(bestEntry);
@@ -379,6 +416,7 @@ async function syncLocalRankingToCloud(){
   firebaseState.cloudLeaderboard = merged;
   firebaseState.callbacks.replaceLocalLeaderboard(merged);
   await writeUserRanking(merged);
+  await writeUserStats(firebaseState.callbacks.getLocalStats()).catch(error => setStatus(friendlyFirebaseError(error), 'danger'));
   await writeGlobalBestEntry(merged[0]).catch(error => setLiveStatus(friendlyFirebaseError(error)));
 }
 
@@ -421,6 +459,31 @@ function watchUserRanking(){
   });
 }
 
+function watchUserStats(){
+  if(firebaseState.unsubscribeStats){
+    firebaseState.unsubscribeStats();
+    firebaseState.unsubscribeStats = null;
+  }
+
+  const path = currentUserStatsPath();
+  if(!path) return;
+
+  const { ref, onValue } = firebaseState.dbApi;
+  firebaseState.unsubscribeStats = onValue(ref(firebaseState.db, path), snapshot => {
+    const remote = normalizeStats(snapshot.val() || {});
+    const local = normalizeStats(firebaseState.callbacks.getLocalStats());
+    const selected = remote.games > local.games || (remote.games === local.games && remote.updatedAt > local.updatedAt)
+      ? remote
+      : local;
+    firebaseState.callbacks.replaceLocalStats(selected, true);
+    if(JSON.stringify(remote) !== JSON.stringify(selected)){
+      writeUserStats(selected).catch(error => setStatus(friendlyFirebaseError(error), 'danger'));
+    }
+  }, error => {
+    setStatus(friendlyFirebaseError(error), 'danger');
+  });
+}
+
 async function handleAuthUser(user){
   firebaseState.currentUser = user || null;
   session.firebaseUser = user ? {
@@ -437,11 +500,16 @@ async function handleAuthUser(user){
     hideAuthModal();
     renderAuthState();
     watchUserRanking();
+    watchUserStats();
     await syncLocalRankingToCloud().catch(error => setStatus(friendlyFirebaseError(error), 'danger'));
   }else{
     if(firebaseState.unsubscribeRanking){
       firebaseState.unsubscribeRanking();
       firebaseState.unsubscribeRanking = null;
+    }
+    if(firebaseState.unsubscribeStats){
+      firebaseState.unsubscribeStats();
+      firebaseState.unsubscribeStats = null;
     }
     firebaseState.cloudLeaderboard = [];
     session.currentUser = firebaseState.guestMode
@@ -590,6 +658,7 @@ export function syncFirebaseLeaderboardEntry(entry){
   const merged = mergeRankings(firebaseState.cloudLeaderboard, firebaseState.callbacks.getLocalLeaderboard(), [normalized]);
   firebaseState.cloudLeaderboard = merged;
   return writeUserRanking(merged)
+    .then(() => writeUserStats(firebaseState.callbacks.getLocalStats()))
     .then(() => writeGlobalBestEntry(merged[0]))
     .then(() => true)
     .catch(error => {

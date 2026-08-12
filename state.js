@@ -14,7 +14,9 @@ export const gameState = {
   starting:false,
   startTime:0,
   endTime:0,
-  gameToken:0
+  gameToken:0,
+  resultRecorded:false,
+  resultId:''
 };
 
 export function resetGameState(){
@@ -29,4 +31,6 @@ export function resetGameState(){
   gameState.startTime = 0;
   gameState.endTime = 0;
   gameState.gameToken++;
+  gameState.resultRecorded = false;
+  gameState.resultId = '';
 }
