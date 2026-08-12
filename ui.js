@@ -2,7 +2,7 @@ import { K_MAX, TOTAL_PAIRS } from './constants.js?v=73';
 import { gameState, session } from './state.js?v=76';
 import { escapeHTML } from './utils.js?v=73';
 import { t } from './i18n.js?v=10';
-import { syncFirebaseLeaderboardEntry } from './firebase-service.js?v=14';
+import { syncFirebaseLeaderboardEntry } from './firebase-service.js?v=15';
 
 const SOLO_LEADERBOARD_KEY = 'memorabetSoloLeaderboard';
 const SOLO_STATS_KEY = 'memorabetSoloStats';
@@ -342,7 +342,7 @@ export function addSoloLeaderboardEntry(entry){
   const ranking = replaceSoloLeaderboard([...getSoloLeaderboard(), savedEntry], false);
 
   syncFirebaseLeaderboardEntry(savedEntry).catch(() => {});
-  renderLeaderboard(ranking);
+  renderLeaderboard();
   renderMobileProfile();
   document.dispatchEvent(new CustomEvent('solo-result-recorded', { detail:{ entry:savedEntry, ranking, stats } }));
   return ranking;

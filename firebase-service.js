@@ -260,8 +260,9 @@ function getCombinedPublicRanking(){
 function refreshSharedRankings(){
   const live = getCombinedPublicRanking();
   renderLiveLeaderboard(live, false);
+  const sharedLive = live.map(publicEntryToLeaderboard).filter(Boolean);
   const sharedResults = firebaseState.globalLeaderboard.map(publicEntryToLeaderboard).filter(Boolean);
-  const mergedShared = mergeRankings(sharedResults, firebaseState.callbacks.getLocalLeaderboard());
+  const mergedShared = mergeRankings(sharedLive, sharedResults, firebaseState.callbacks.getLocalLeaderboard());
   firebaseState.callbacks.setSharedLeaderboard(mergedShared, true);
 }
 
