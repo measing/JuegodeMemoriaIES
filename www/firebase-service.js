@@ -4,7 +4,8 @@ import { escapeHTML } from './utils.js?v=73';
 const FIREBASE_CDN_VERSION = '12.17.1';
 const USER_RANKING_LIMIT = 20;
 const GLOBAL_RANKING_LIMIT = 8;
-const GLOBAL_RANKING_PATH = 'publicSoloLeaderboard';
+const GLOBAL_RANKING_PATH = 'publicSoloResults';
+const GUEST_ALIAS_KEY = 'solitarioUcmGuestAlias';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBlS57whvjjsE3TLCYIP04zbemXealon6Q",
@@ -93,12 +94,29 @@ function safeAlias(value){
   return (raw || 'Jugador').slice(0, 24);
 }
 
+function getGuestAlias(){
+  try{
+    const saved = localStorage.getItem(GUEST_ALIAS_KEY);
+    if(saved) return saved;
+    const alias = `Invitado ${Math.floor(1000 + Math.random() * 9000)}`;
+    localStorage.setItem(GUEST_ALIAS_KEY, alias);
+    return alias;
+  }catch{
+    return 'Invitado solitario';
+  }
+}
+
+function isAnonymousUser(user = firebaseState.currentUser){
+  return !!user?.isAnonymous;
+}
+
 function normalizeGlobalEntry(entry){
   const tiempoMs = Number(entry?.tiempoMs);
   const intentos = Number(entry?.intentos);
   const pairs = Number(entry?.pairs);
   if(!Number.isFinite(tiempoMs) || !Number.isFinite(intentos) || !Number.isFinite(pairs)) return null;
   return {
+    id:String(entry?.id || entry?.resultId || entry?.updatedAt || ''),
     alias:safeAlias(entry?.alias),
     pairs:Math.max(0, Math.min(8, Math.round(pairs))),
     tiempoMs:Math.max(0, tiempoMs),
@@ -108,9 +126,20 @@ function normalizeGlobalEntry(entry){
   };
 }
 
+function globalEntriesFromValue(value){
+  if(Array.isArray(value)) return value;
+  return Object.entries(value || {}).flatMap(([key, entry]) => {
+    if(!entry || typeof entry !== 'object') return [];
+    if('tiempoMs' in entry || 'pairs' in entry || 'intentos' in entry) return [{ id:key, ...entry }];
+    return Object.entries(entry).map(([childKey, child]) => ({
+      id:childKey,
+      ...(child || {})
+    }));
+  });
+}
+
 function normalizeGlobalRanking(value){
-  const rawEntries = Array.isArray(value) ? value : Object.values(value || {});
-  return rawEntries
+  return globalEntriesFromValue(value)
     .map(normalizeGlobalEntry)
     .filter(Boolean)
     .sort(byGlobalScore)
@@ -167,20 +196,21 @@ function renderLiveLeaderboard(ranking = firebaseState.globalLeaderboard, isLoca
   firebaseState.globalLeaderboard = normalized;
   if(!normalized.length){
     list.innerHTML = '<li class="live-ranking-empty">Sin resultados todavia.</li>';
-    setLiveStatus(isLocal ? 'Ranking local de este navegador.' : 'Esperando resultados de Firebase.');
+    setLiveStatus('');
     return;
   }
   list.innerHTML = normalized.map((entry, index) => `
     <li class="live-ranking-row">
       <span class="live-ranking-pos">${index + 1}</span>
-      <span class="live-ranking-name">${escapeHTML(entry.alias)}</span>
+      <span class="live-ranking-copy">
+        <strong class="live-ranking-name">#${index + 1} ${escapeHTML(entry.alias)}</strong>
+        <small>${entry.pairs}/8 pares &middot; ${Number(entry.intentos)} intentos &middot; ${formatDuration(entry.tiempoMs)}</small>
+      </span>
       <span class="live-ranking-score">${entry.pairs}/8</span>
-      <small>${formatDuration(entry.tiempoMs)} · ${Number(entry.intentos)} int.</small>
     </li>
   `).join('');
-  setLiveStatus(isLocal ? 'Modo local hasta conectar Firebase.' : 'Actualizado desde Firebase.');
+  setLiveStatus('');
 }
-
 function renderLocalLiveFallback(){
   const local = firebaseState.callbacks.getLocalLeaderboard()
     .map(item => ({
@@ -226,38 +256,39 @@ function setAuthBusy(isBusy){
 
 function renderAuthState(){
   const user = firebaseState.currentUser;
-  const label = user ? (user.displayName || user.email || 'Jugador conectado') : '';
+  const anonymous = isAnonymousUser(user);
+  const guest = firebaseState.guestMode || anonymous;
+  const label = user && !anonymous ? (user.displayName || user.email || 'Jugador conectado') : (guest ? getGuestAlias() : '');
   const profileName = document.getElementById('solo-profile-name');
   const profileStatus = document.getElementById('solo-profile-status');
   const playerAwards = document.querySelector('.player-awards');
   const sidebarLogin = document.getElementById('btn-sidebar-login');
   const settingsAccount = document.getElementById('settings-account-section');
   const settingsAccountName = document.getElementById('settings-account-name');
-  const guest = firebaseState.guestMode && !user;
 
-  document.body.classList.toggle('account-connected', !!user);
+  document.body.classList.toggle('account-connected', !!user && !anonymous);
   document.body.classList.toggle('guest-mode', guest);
-  document.documentElement.classList.toggle('account-connected', !!user);
+  document.documentElement.classList.toggle('account-connected', !!user && !anonymous);
   document.documentElement.classList.toggle('guest-mode', guest);
   if(profileName) profileName.textContent = label || (guest ? 'Invitado solitario' : 'Jugador solitario');
   if(profileStatus){
-    profileStatus.textContent = user ? '' : (guest ? 'Invitado' : 'Modo local');
-    profileStatus.hidden = !!user;
+    profileStatus.textContent = user && !anonymous ? '' : (guest ? 'Invitado' : 'Modo local');
+    profileStatus.hidden = !!user && !anonymous;
   }
   if(playerAwards){
     playerAwards.textContent = '';
     playerAwards.hidden = true;
     playerAwards.setAttribute('aria-hidden', 'true');
   }
-  if(sidebarLogin) sidebarLogin.hidden = !!user;
-  if(settingsAccount) settingsAccount.hidden = !user;
+  if(sidebarLogin) sidebarLogin.hidden = !!user && !anonymous;
+  if(settingsAccount) settingsAccount.hidden = !user || anonymous;
   if(settingsAccountName) settingsAccountName.textContent = label || 'Jugador';
 }
 
 function friendlyFirebaseError(error){
   const code = String(error?.code || '');
   if(code.includes('auth/operation-not-allowed')){
-    return 'Ese proveedor no esta habilitado. Activa Email/Password o Google en Firebase Console.';
+    return 'Ese proveedor no esta habilitado. Activa Email/Password, Google o Anonymous en Firebase Console.';
   }
   if(code.includes('auth/unauthorized-domain')){
     return 'Dominio no autorizado. Agrega localhost, 127.0.0.1 y el dominio final en Firebase Authentication.';
@@ -343,10 +374,17 @@ function hideAuthModal(){
 function enterGuestMode(){
   firebaseState.guestMode = true;
   session.firebaseUser = null;
-  session.currentUser = { nickname:'Invitado solitario', isGuest:true };
+  session.currentUser = { nickname:getGuestAlias(), isGuest:true };
   hideAuthModal();
   renderAuthState();
   document.dispatchEvent(new CustomEvent('firebase-auth-change', { detail:{ user:null, guest:true } }));
+
+  if(firebaseState.ready && !firebaseState.currentUser){
+    const { signInAnonymously } = firebaseState.authApi;
+    signInAnonymously(firebaseState.auth).catch(error => {
+      setStatus(`${friendlyFirebaseError(error)} El ranking queda local en este navegador.`, 'warning');
+    });
+  }
 }
 
 function getAuthFields(){
@@ -390,14 +428,15 @@ async function writeUserStats(stats){
   });
 }
 
-async function writeGlobalBestEntry(bestEntry){
-  if(!firebaseState.ready || !firebaseState.currentUser || !bestEntry) return;
-  const normalized = normalizeEntry(bestEntry);
+async function writeGlobalResultEntry(entry){
+  if(!firebaseState.ready || !firebaseState.currentUser || !entry) return;
+  const normalized = normalizeEntry(entry);
   if(!normalized) return;
   const path = currentGlobalRankingPath();
   if(!path) return;
   const alias = safeAlias(firebaseState.currentUser.displayName || firebaseState.currentUser.email || normalized.name);
   const publicEntry = {
+    id:normalized.id,
     alias,
     pairs:Number(normalized.pairs || 0),
     tiempoMs:Number(normalized.tiempoMs),
@@ -406,7 +445,7 @@ async function writeGlobalBestEntry(bestEntry){
     updatedAt:Number(normalized.completedAt || Date.now())
   };
   const { ref, set } = firebaseState.dbApi;
-  await set(ref(firebaseState.db, path), publicEntry);
+  await set(ref(firebaseState.db, `${path}/${normalized.id}`), publicEntry);
 }
 
 async function syncLocalRankingToCloud(){
@@ -417,7 +456,7 @@ async function syncLocalRankingToCloud(){
   firebaseState.callbacks.replaceLocalLeaderboard(merged);
   await writeUserRanking(merged);
   await writeUserStats(firebaseState.callbacks.getLocalStats()).catch(error => setStatus(friendlyFirebaseError(error), 'danger'));
-  await writeGlobalBestEntry(merged[0]).catch(error => setLiveStatus(friendlyFirebaseError(error)));
+  await Promise.all(merged.slice(0, GLOBAL_RANKING_LIMIT).map(entry => writeGlobalResultEntry(entry))).catch(error => setLiveStatus(friendlyFirebaseError(error)));
 }
 
 function watchGlobalRanking(){
@@ -489,13 +528,17 @@ async function handleAuthUser(user){
   session.firebaseUser = user ? {
     uid:user.uid,
     email:user.email || '',
-    displayName:user.displayName || ''
+    displayName:user.displayName || '',
+    isAnonymous:!!user.isAnonymous
   } : null;
 
   if(user){
-    firebaseState.guestMode = false;
-    session.currentUser = { nickname:user.displayName || user.email || 'Jugador' };
-    setStatus('Sesion iniciada. Ranking sincronizado con tu usuario.', 'success');
+    const anonymous = isAnonymousUser(user);
+    firebaseState.guestMode = anonymous;
+    session.currentUser = anonymous
+      ? { uid:user.uid, nickname:getGuestAlias(), isGuest:true }
+      : { uid:user.uid, nickname:user.displayName || user.email || 'Jugador' };
+    setStatus(anonymous ? 'Invitado conectado. Las partidas terminadas se pueden ver en el ranking compartido.' : 'Sesion iniciada. Ranking sincronizado con tu usuario.', 'success');
     setAuthError('');
     hideAuthModal();
     renderAuthState();
@@ -513,7 +556,7 @@ async function handleAuthUser(user){
     }
     firebaseState.cloudLeaderboard = [];
     session.currentUser = firebaseState.guestMode
-      ? { nickname:'Invitado solitario', isGuest:true }
+      ? { nickname:getGuestAlias(), isGuest:true }
       : { nickname:'Modo solitario' };
     setStatus(firebaseState.ready ? 'Sin sesion. El ranking queda guardado localmente.' : 'Firebase no disponible. Juego local activo.', firebaseState.ready ? 'info' : 'warning');
     renderAuthState();
@@ -659,7 +702,7 @@ export function syncFirebaseLeaderboardEntry(entry){
   firebaseState.cloudLeaderboard = merged;
   return writeUserRanking(merged)
     .then(() => writeUserStats(firebaseState.callbacks.getLocalStats()))
-    .then(() => writeGlobalBestEntry(merged[0]))
+    .then(() => writeGlobalResultEntry(normalized))
     .then(() => true)
     .catch(error => {
       setStatus(friendlyFirebaseError(error), 'danger');

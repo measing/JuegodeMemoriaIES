@@ -14,7 +14,7 @@ import {
   addSoloLeaderboardEntry,
   renderLeaderboard,
   showRulesModalIfNeeded
-} from './ui.js?v=116';
+} from './ui.js?v=117';
 import { playCardFlip, playShuffle, playMatch, playMiss } from './audio.js?v=75';
 import { t } from './i18n.js?v=10';
 

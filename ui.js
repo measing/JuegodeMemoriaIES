@@ -2,7 +2,7 @@ import { K_MAX, TOTAL_PAIRS } from './constants.js?v=73';
 import { gameState, session } from './state.js?v=75';
 import { escapeHTML } from './utils.js?v=73';
 import { t } from './i18n.js?v=10';
-import { syncFirebaseLeaderboardEntry } from './firebase-service.js?v=9';
+import { syncFirebaseLeaderboardEntry } from './firebase-service.js?v=11';
 
 const SOLO_LEADERBOARD_KEY = 'memorabetSoloLeaderboard';
 const SOLO_STATS_KEY = 'memorabetSoloStats';
