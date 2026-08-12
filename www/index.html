@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png?v=4" />
   <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=4" />
   <link rel="apple-touch-icon" href="assets/app-icon-192.png?v=4" />
-  <link rel="stylesheet" href="style.css?v=151" />
+  <link rel="stylesheet" href="style.css?v=153" />
 </head>
 <body>
   <div id="mobile-loading-screen" class="mobile-loading-screen" aria-hidden="true">
@@ -170,7 +170,7 @@
         <div class="view-panel">
           <div class="view-heading">
             <span>&#127942;</span>
-            <h1>Ranking solitario</h1>
+            <h1>Ranking</h1>
           </div>
           <div id="leaderboard-list" class="ranking-list page-list"><p class="empty">Aun nadie completa los 8 pares.</p></div>
         </div>
@@ -192,10 +192,12 @@
           <section class="profile-metric-grid" aria-label="Estadisticas del perfil">
             <article class="profile-metric">
               <span>Partidas completadas</span>
+              <small>Jugadas registradas</small>
               <strong id="profile-completed-games">0</strong>
             </article>
             <article class="profile-metric">
-              <span>Promedio de pares por partida completada</span>
+              <span>Promedio de pares</span>
+              <small>Por partida completada</small>
               <strong id="profile-average-pairs">0</strong>
             </article>
           </section>
@@ -271,7 +273,7 @@
       }, 800);
     })();
   </script>
-  <script type="module" src="main.js?v=153"></script>
+  <script type="module" src="main.js?v=154"></script>
 </body>
 </html>
 

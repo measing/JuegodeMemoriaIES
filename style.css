@@ -3556,3 +3556,80 @@ body.guest-mode .solo-account-actions button{
   }
 }
 
+
+@media (max-width:860px), (hover:none) and (pointer:coarse){
+  .live-ranking-panel,
+  .game-round-active .live-ranking-panel,
+  body.live-ranking-open .live-ranking-panel{
+    display:none!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+}
+@media (max-width:860px), (hover:none) and (pointer:coarse){
+  #profile-view .view-panel.profile-page{
+    width:min(430px, calc(100vw - 22px))!important;
+    padding:18px 14px 22px!important;
+  }
+  #profile-view .view-heading{
+    grid-template-columns:auto minmax(0,1fr) auto;
+    gap:12px;
+    padding-right:64px;
+  }
+  #profile-view .view-heading h1{
+    font-size:clamp(34px, 11vw, 48px)!important;
+    line-height:.95;
+  }
+  #profile-view .profile-summary-card{
+    grid-template-columns:64px minmax(0,1fr)!important;
+    gap:14px!important;
+    padding:14px!important;
+    margin-bottom:12px!important;
+  }
+  #profile-view .profile-summary-avatar{
+    width:64px!important;
+    height:64px!important;
+  }
+  #profile-view .profile-summary-copy h2{
+    font-size:clamp(24px, 7.2vw, 32px)!important;
+    line-height:1.02;
+  }
+  #profile-view .profile-summary-copy p{
+    font-size:13px!important;
+    line-height:1.25;
+  }
+  #profile-view .profile-metric-grid{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+  }
+  #profile-view .profile-metric{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-areas:"label value" "hint value"!important;
+    align-items:center!important;
+    min-height:82px!important;
+    padding:14px 16px!important;
+  }
+  #profile-view .profile-metric span{
+    grid-area:label;
+    font-size:16px!important;
+    line-height:1.12!important;
+  }
+  #profile-view .profile-metric small{
+    grid-area:hint;
+    display:block;
+    margin-top:4px;
+    color:#b9d4d6;
+    font-size:12px;
+    font-weight:800;
+    line-height:1.15;
+  }
+  #profile-view .profile-metric strong{
+    grid-area:value;
+    min-width:72px;
+    text-align:right;
+    font-size:clamp(38px, 13vw, 56px)!important;
+    line-height:1!important;
+  }
+}

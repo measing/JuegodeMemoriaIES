@@ -1,7 +1,7 @@
 import { K_MAX, TOTAL_PAIRS } from './constants.js?v=73';
 import { gameState, session } from './state.js?v=76';
 import { escapeHTML } from './utils.js?v=73';
-import { t } from './i18n.js?v=10';
+import { t } from './i18n.js?v=11';
 import { syncFirebaseLeaderboardEntry } from './firebase-service.js?v=15';
 
 const SOLO_LEADERBOARD_KEY = 'memorabetSoloLeaderboard';
@@ -362,12 +362,12 @@ export function renderLeaderboard(ranking = session.sharedLeaderboard?.length ? 
 
   list.innerHTML = `
     <section class="ranking-section ranking-section-solo">
-      <h2>${escapeHTML(t('ranking.soloTitle'))}</h2>
+
       ${normalized.map((item, index) => `
         <div class="ranking-item">
           <div class="entry-avatar ranking-avatar"><span>${index + 1}</span></div>
           <div>
-            <div class="ranking-name">#${index + 1} ${escapeHTML(item.name || t('common.player'))}</div>
+            <div class="ranking-name">${escapeHTML(item.name || t('common.player'))}</div>
             <div class="ranking-meta">${Number(item.pairs || 0)}/${TOTAL_PAIRS} pares &middot; ${escapeHTML(t('ranking.tries', { count:Number(item.intentos || 0) }))} &middot; ${formatDuration(Number(item.tiempoMs || 0))}</div>
           </div>
           <div class="ranking-prize">${Number(item.pairs || 0)}/${TOTAL_PAIRS}</div>
