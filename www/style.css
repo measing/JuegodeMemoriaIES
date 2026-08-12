@@ -2116,7 +2116,7 @@ body.online-duel-active #btn-exit{
     font-size:13px;
   }
   .profile-card{gap:12px}
-  .profile-avatar-large{width:72px;height:72px}
+  .profile-avatar-large{width:78px;height:72px}
   .profile-card h2{font-size:23px}
   .profile-card p{font-size:19px}
   .friends-panel{width:100%}
@@ -2930,13 +2930,11 @@ body:not(.game-round-active) .bottom-hud{
   border-radius:18px;
 }
 .solo-auth-mark{
-  width:86px;
+  width:92px;
   aspect-ratio:1;
   border-radius:18px;
-  background-image:var(--card-back-skin);
-  background-size:cover;
-  background-position:center;
-  box-shadow:0 0 0 2px rgba(249,199,79,.8),0 16px 36px rgba(0,0,0,.34);
+  background:#f8fbff url("assets/ies-logo.png?v=2") center/contain no-repeat;
+  box-shadow:0 0 0 2px rgba(249,199,79,.82),0 16px 36px rgba(0,0,0,.34);
 }
 .solo-auth-box h2{
   margin-top:2px;
@@ -2975,7 +2973,7 @@ body:not(.game-round-active) .bottom-hud{
     padding:22px;
   }
   .solo-auth-mark{
-    width:72px;
+    width:78px;
   }
 }
 
@@ -3627,7 +3625,7 @@ body.guest-mode .solo-account-actions button{
   }
   #profile-view .profile-metric strong{
     grid-area:value;
-    min-width:72px;
+    min-width:78px;
     text-align:right;
     font-size:clamp(38px, 13vw, 56px)!important;
     line-height:1!important;

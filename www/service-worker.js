@@ -1,4 +1,4 @@
-const CACHE_NAME = 'memorabet-solo-v39';
+const CACHE_NAME = 'memorabet-solo-v41';
 
 const LOCAL_ASSETS = [
   './',
@@ -34,6 +34,7 @@ const LOCAL_ASSETS = [
   './assets/animals/rana.png',
   './assets/animals/perro.png',
   './assets/avatars/avatar-01.png',
+  './assets/avatars/ies-profile-avatar.png',
   './assets/card-backs/ucm-statistics-default.png',
   './assets/sounds/casino-vip-7.mp3',
   './assets/sounds/we-will-empty-this-casino.mp3',

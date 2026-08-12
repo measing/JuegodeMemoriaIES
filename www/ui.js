@@ -6,7 +6,7 @@ import { syncFirebaseLeaderboardEntry } from './firebase-service.js?v=15';
 
 const SOLO_LEADERBOARD_KEY = 'memorabetSoloLeaderboard';
 const SOLO_STATS_KEY = 'memorabetSoloStats';
-const DEFAULT_AVATAR = 'assets/avatars/avatar-01.png';
+const DEFAULT_AVATAR = 'assets/avatars/ies-profile-avatar.png?v=1';
 const CARD_SKIN_SELECTED_KEY = 'memorabetSelectedCardSkin';
 const DEFAULT_CARD_SKIN_ID = 'ucm-statistics';
 const CARD_SKINS = [

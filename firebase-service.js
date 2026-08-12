@@ -382,7 +382,8 @@ function friendlyFirebaseError(error){
     return 'Ese proveedor no esta habilitado. Activa Email/Password, Google o Anonymous en Firebase Console.';
   }
   if(code.includes('auth/unauthorized-domain')){
-    return 'Dominio no autorizado. Agrega localhost, 127.0.0.1 y el dominio final en Firebase Authentication.';
+    const host = location.hostname || 'este dominio';
+    return `Dominio no autorizado para Google. Agrega ${host} en Firebase Console > Authentication > Settings > Authorized domains.`;
   }
   if(code.includes('auth/popup-closed-by-user')){
     return 'La ventana de Google se cerro antes de completar el inicio de sesion.';
