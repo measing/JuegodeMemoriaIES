@@ -3631,3 +3631,8 @@ body.guest-mode .solo-account-actions button{
     line-height:1!important;
   }
 }
+@media (max-width:860px), (hover:none) and (pointer:coarse){
+  body:not([data-active-view="game"]):not([data-active-view="settings"]) .mobile-global-settings-button{
+    display:none!important;
+  }
+}

@@ -368,7 +368,7 @@ export function renderLeaderboard(ranking = session.sharedLeaderboard?.length ? 
           <div class="entry-avatar ranking-avatar"><span>${index + 1}</span></div>
           <div>
             <div class="ranking-name">${escapeHTML(item.name || t('common.player'))}</div>
-            <div class="ranking-meta">${Number(item.pairs || 0)}/${TOTAL_PAIRS} pares &middot; ${escapeHTML(t('ranking.tries', { count:Number(item.intentos || 0) }))} &middot; ${formatDuration(Number(item.tiempoMs || 0))}</div>
+            <div class="ranking-meta">${escapeHTML(t('ranking.tries', { count:Number(item.intentos || 0) }))} &middot; ${formatDuration(Number(item.tiempoMs || 0))}</div>
           </div>
           <div class="ranking-prize">${Number(item.pairs || 0)}/${TOTAL_PAIRS}</div>
         </div>
@@ -431,6 +431,8 @@ function getActiveViewName(){
 
 export function showView(viewName){
   const target = viewName || 'game';
+  document.body.dataset.activeView = target;
+  document.documentElement.dataset.activeView = target;
   const previous = getActiveViewName();
   if(target === 'settings' && previous && previous !== 'settings'){
     previousContentViewName = previous;

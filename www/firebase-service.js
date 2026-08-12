@@ -284,8 +284,8 @@ function renderLiveLeaderboard(ranking = getCombinedPublicRanking(), isLocal = f
     <li class="live-ranking-row">
       <span class="live-ranking-pos">${index + 1}</span>
       <span class="live-ranking-copy">
-        <strong class="live-ranking-name">#${index + 1} ${escapeHTML(entry.alias)}</strong>
-        <small>${entry.pairs}/8 pares &middot; ${Number(entry.intentos)} intentos &middot; ${formatDuration(entry.tiempoMs)}</small>
+        <strong class="live-ranking-name">${escapeHTML(entry.alias)}</strong>
+        <small>${Number(entry.intentos)} intentos &middot; ${formatDuration(entry.tiempoMs)}</small>
       </span>
       <span class="live-ranking-score">${entry.pairs}/8</span>
     </li>
